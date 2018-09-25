@@ -18,4 +18,6 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_register">Register</string>
+    <string name="title_activity_start">Sign in</string>
+    <string name="title_activity_login">Sign in</string>
 </resources>
