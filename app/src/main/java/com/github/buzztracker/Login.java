@@ -51,7 +51,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
      */
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "jessie@pokemon.com:james123", "james@pokemon.com:jessie123"
-    }
+    };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
