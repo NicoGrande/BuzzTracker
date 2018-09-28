@@ -161,8 +161,8 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
+        if (!TextUtils.isEmpty(password)) {
+            mPasswordView.setError(getString(R.string.error_empty_password));
             focusView = mPasswordView;
             cancel = true;
         }
@@ -195,12 +195,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         //TODO: Replace this with your own logic
         return email.contains("@");
     }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
-    }
-
+    
     /**
      * Shows the progress UI and hides the login form.
      */
