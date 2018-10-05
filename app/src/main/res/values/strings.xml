@@ -21,4 +21,16 @@
     <string name="title_activity_start">Sign in</string>
     <string name="title_activity_login">Sign in</string>
     <string name="logout_button">Logout</string>
+    <string name="last_name">Last Name</string>
+    <string name="first_name">First Name</string>
+    <string name="new_password">New Password</string>
+    <string name="repeat_new_password">Repeat New Password</string>
+    <string name="email">Email</string>
+    <string name="username">Username</string>
+    <string name="register">Register</string>
+    <string name="user_type">User Type</string>
+    <string name="location">Location</string>
+    <string name="cancel">Cancel</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="manager_if_applicable">Manager (if applicable)</string>
 </resources>
