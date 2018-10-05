@@ -56,7 +56,6 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
-
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -88,6 +87,17 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+
+        Button mEmailRegisterButton = (Button) findViewById(R.id.email_sign_in_button2);
+        mEmailRegisterButton.setOnClickListener(new View.OnClickListener() {
+
+
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(Login.this, Register.class);
+                Login.this.startActivity(i);
             }
         });
 
@@ -161,7 +171,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_empty_password));
             focusView = mPasswordView;
             cancel = true;
