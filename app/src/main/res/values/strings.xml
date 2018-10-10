@@ -21,6 +21,8 @@
     <string name="title_activity_start">Sign in</string>
     <string name="title_activity_login">Sign in</string>
     <string name="logout_button">Logout</string>
+
+    <!-- String related to registration -->
     <string name="last_name">Last Name</string>
     <string name="first_name">First Name</string>
     <string name="new_password">New Password</string>
@@ -29,8 +31,18 @@
     <string name="username">Username</string>
     <string name="register">Register</string>
     <string name="user_type">User Type</string>
-    <string name="location">Location</string>
+    <string name="location">Location (if location employee)</string>
     <string name="cancel">Cancel</string>
     <string name="phone_number">Phone Number</string>
-    <string name="manager_if_applicable">Manager (if applicable)</string>
+    <string name="manager_if_applicable">Manager (if location employee)</string>
+    <string name="email_already_used">This email is already associated with an account</string>
+    <string name="error_invalid_phone_number">Please enter a valid phone number</string>
+    <string name="error_invalid_name">Please enter a valid name</string>
+    <string name="error_password_must_match">Passwords must match</string>
+    <string-array name="user_types">
+        <item>User</item>
+        <item>Location Employee</item>
+        <item>Admin</item>
+        <item>Manager</item>
+    </string-array>
 </resources>

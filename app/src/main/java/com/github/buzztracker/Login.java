@@ -205,7 +205,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         //TODO: Replace this with your own logic
         return email.contains("@");
     }
-    
+
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -321,16 +321,11 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
+            if (User.credentials.containsKey(mEmail) && User.credentials.get(mEmail).equals(mPassword)) {
+                return true;
+            } else {
+                return false;
             }
-
-            // TODO: register the new account here.
-            return false;
         }
 
         @Override

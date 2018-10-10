@@ -1,5 +1,7 @@
 package com.github.buzztracker;
 
+import java.util.HashMap;
+
 public class User {
 
     private String userName;
@@ -10,7 +12,14 @@ public class User {
     private long phoneNumber;
     private int employeeID;
 
-    public User(String UN, String PW, String firstName, String lastName, String email, long phoneNumber, int employeeID) {
+    // email to password mapping for login
+    public static HashMap<String, String> credentials = new HashMap<>();
+
+    // email to user mapping for user lookup
+    public static HashMap<String, User> users = new HashMap<>();
+
+    public User(String UN, String PW, String firstName, String lastName, String email,
+                long phoneNumber, int employeeID) {
 
         userName = UN;
         passWord = PW;
@@ -20,6 +29,7 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.employeeID = employeeID;
 
+        credentials.put(userName, passWord);
     }
 
     public String getUserName() {
