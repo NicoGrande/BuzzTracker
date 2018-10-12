@@ -33,7 +33,6 @@ public class Register extends AppCompatActivity {
     private EditText firstNameView;
     private EditText lastNameView;
     private EditText phoneNumberView;
-    private EditText usernameView;
     private EditText locationView;
     private EditText managerView;
     private Spinner usertypeSpinner;
@@ -103,7 +102,6 @@ public class Register extends AppCompatActivity {
         firstNameView = findViewById(R.id.first_name);
         lastNameView = findViewById(R.id.last_name);
         phoneNumberView = findViewById(R.id.phone_number);
-        usernameView = findViewById(R.id.username);
         locationView = findViewById(R.id.location);
         managerView = findViewById(R.id.manager);
 
@@ -133,7 +131,6 @@ public class Register extends AppCompatActivity {
         firstNameView.setError(null);
         lastNameView.setError(null);
         phoneNumberView.setError(null);
-        usernameView.setError(null);
         locationView.setError(null);
         managerView.setError(null);
 
@@ -143,7 +140,6 @@ public class Register extends AppCompatActivity {
         String firstname = firstNameView.getText().toString();
         String lastname = lastNameView.getText().toString();
         String phonenumber = phoneNumberView.getText().toString();
-        String username = usernameView.getText().toString();
         String location = locationView.getText().toString();
         String managername = managerView.getText().toString();
         String userType = usertypeSpinner.getSelectedItem().toString();
@@ -152,6 +148,7 @@ public class Register extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
+        // Manager verification
         // Todo: Add manager verification
         if (userType.equals("Location Employee") && TextUtils.isEmpty(managername)) {
             managerView.setError(getString(R.string.error_field_required));
@@ -159,6 +156,7 @@ public class Register extends AppCompatActivity {
             cancel = true;
         }
 
+        // Location verification
         // Todo: Add location verification
         if (userType.equals("Location Employee") && TextUtils.isEmpty(location)) {
             locationView.setError(getString(R.string.error_field_required));
@@ -166,66 +164,69 @@ public class Register extends AppCompatActivity {
             cancel = true;
         }
 
-        // Todo: Add username requirements
-        if (TextUtils.isEmpty(username)) {
-            usernameView.setError(getString(R.string.error_field_required));
-            focusView = usernameView;
+        // Password verification
+        if (!(password1.equals(password2))) {
+            mPasswordView2.setError(getString(R.string.error_password_must_match));
+            focusView = mPasswordView2;
+            cancel = true;
+        } else if (TextUtils.isEmpty(password2)) {
+            mPasswordView2.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView2;
             cancel = true;
         }
-
+        if (TextUtils.isEmpty(password1)) {
+            mPasswordView1.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView1;
+            cancel = true;
+        } else if (!(isStrongPassword(password1))) {
+            mPasswordView1.setError(getString(R.string.error_password_strength));
+            focusView = mPasswordView1;
+            cancel = true;
+        }
+      
+        // Phone number verification
         if (TextUtils.isEmpty(phonenumber)) {
             phoneNumberView.setError(getString(R.string.error_field_required));
             focusView = phoneNumberView;
             cancel = true;
             // Regex match for only numbers
+        } else {
+            phonenumber = parsePhoneNumber(phonenumber);
+            if (!(isPhoneValid(phonenumber))) {
+                phoneNumberView.setError(getString(R.string.error_invalid_phone_number));
+                focusView = phoneNumberView;
+                cancel = true;
+            }
         }
 
-        if (TextUtils.isEmpty(password2)) {
-            mPasswordView2.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView2;
-            cancel = true;
-        } else if (!(password1.equals(password2))) {
-            mPasswordView2.setError(getString(R.string.error_password_must_match));
-            focusView = mPasswordView2;
-            cancel = true;
-        }
-
-        // Todo: Add password strength requirements
-        if (TextUtils.isEmpty(password1)) {
-            mPasswordView1.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView1;
-            cancel = true;
-        }
-
+        // Email verification
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!(email.contains("@")) || !(email.contains("."))) {
+        } else if (!(isPotentialEmail(email))) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
         }
 
-        // TODO: Diversify name verification
+        // Last name verification
         if (TextUtils.isEmpty(lastname)) {
             lastNameView.setError(getString(R.string.error_field_required));
             focusView = lastNameView;
             cancel = true;
-            // Regex match for all international letters
-        } else if (!(lastname.matches("^[\\p{L}]+$"))) {
+        } else if (!(isNameLegal(lastname))) {
             lastNameView.setError(getString(R.string.error_invalid_name));
             focusView = lastNameView;
             cancel = true;
         }
 
-        // Todo: Diversify name verification
+        // Last name verification
         if (TextUtils.isEmpty(firstname)) {
             firstNameView.setError(getString(R.string.error_field_required));
             focusView = firstNameView;
             cancel = true;
-            // Regex match for all international letters
-        } else if (!(firstname.matches("^[\\p{L}]+$"))) {
+        } else if (!(isNameLegal(firstname))) {
             firstNameView.setError(getString(R.string.error_invalid_name));
             focusView = firstNameView;
             cancel = true;
@@ -240,14 +241,68 @@ public class Register extends AppCompatActivity {
             showProgress(true);
             if (userType.equals("Location Employee")) {
                 mRegisterTask = new UserRegisterTask(email, password1, firstname, lastname, phonenumber,
-                        username, location, managername, userType);
+                        location, managername, userType);
                 mRegisterTask.execute((Void) null);
             } else {
                 mRegisterTask = new UserRegisterTask(email, password1, firstname, lastname, phonenumber,
-                        username, userType);
+                        userType);
                 mRegisterTask.execute((Void) null);
             }
         }
+    }
+
+    // Removes -, ', and whitespace from names
+    private boolean isNameLegal(String name) {
+        name = name.replaceAll("\\s+", "");
+        name = name.replaceAll("-", "");
+        name = name.replaceAll("\\'", "");
+        // Matches all international characters
+        return name.matches("^[\\p{L}]+$");
+    }
+
+    // Verify strength of password
+    // Requires at least:
+    //     8 characters
+    //     One uppercase letter
+    //     One lowercase letter
+    //     One number
+    private boolean isStrongPassword(String password) {
+        if (password.length() >= 8
+                && password.matches(".*[A-Z].*")
+                && password.matches(".*[a-z].*")
+                && password.matches(".*\\d+.*")) {
+            return true;
+        }
+        return false;
+    }
+
+    // Verifies possible email addresses with complicated regex (SO to StackOverflow)
+    private boolean isPotentialEmail(String email) {
+        if (email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+" +
+                ")*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\" +
+                "[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
+                "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?" +
+                "[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*" +
+                "[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\" +
+                "[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")) {
+            return true;
+        }
+        return false;
+    }
+
+    // Determines if parsed phone number has only numbers and is not empty
+    private boolean isPhoneValid(String number) {
+        return number.matches("\\d+");
+    }
+
+    // Pulls only numbers out of phone number; removes (), ., -, +, and white space
+    private String parsePhoneNumber(String number) {
+        String[] nums = number.split("(\\s|\\(|\\)|-|\\.|\\+)*");
+        number = "";
+        for (String numbers: nums) {
+            number += numbers;
+        }
+        return number;
     }
 
     // Displays a loading screen circle
@@ -280,27 +335,25 @@ public class Register extends AppCompatActivity {
         private final String mFirstname;
         private final String mLastname;
         private final String mPhoneNumber;
-        private final String mUsername;
         private final String mLocation;
         private final String mManager;
         private final String mUsertype;
 
         UserRegisterTask(String email, String password, String firstname, String lastname,
-                         String phonenumber, String username, String location, String manager, String usertype) {
+                         String phonenumber, String location, String manager, String usertype) {
             mEmail = email;
             mPassword = password;
             mFirstname = firstname;
             mLastname = lastname;
             mPhoneNumber = phonenumber;
-            mUsername = username;
             mLocation = location;
             mManager = manager;
             mUsertype = usertype;
         }
 
         UserRegisterTask(String email, String password, String firstname, String lastname,
-                         String phonenumber, String username, String usertype) {
-            this(email, password, firstname, lastname, phonenumber, username, null, null, usertype);
+                         String phonenumber, String usertype) {
+            this(email, password, firstname, lastname, phonenumber, null, null, usertype);
         }
 
         @Override
@@ -308,13 +361,11 @@ public class Register extends AppCompatActivity {
 
             // TODO: register the new account here. Verify unique email
             if (User.credentials.containsKey(mEmail)) {
-                System.out.println("already contains email");
                 return false;
             } else {
                 User.credentials.put(mEmail, mPassword);
-                User.users.put(mEmail, new User(mUsername, mPassword, mFirstname, mLastname, mEmail,
+                User.users.put(mEmail, new User(mPassword, mFirstname, mLastname, mEmail,
                         Long.parseLong(mPhoneNumber, 10), 0));
-                System.out.println("created user");
             }
             return true;
         }
@@ -323,7 +374,6 @@ public class Register extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
             mRegisterTask = null;
             showProgress(false);
-            System.out.println("postexec");
             if (success) {
                 Intent myIntent = new Intent(Register.this, MainScreenActivity.class);
                 Register.this.startActivity(myIntent);
