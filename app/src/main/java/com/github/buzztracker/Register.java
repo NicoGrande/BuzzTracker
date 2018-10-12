@@ -168,6 +168,26 @@ public class Register extends AppCompatActivity {
             cancel = true;
         }
 
+        // Password verification
+        if (!(password1.equals(password2))) {
+            mPasswordView2.setError(getString(R.string.error_password_must_match));
+            focusView = mPasswordView2;
+            cancel = true;
+        } else if (TextUtils.isEmpty(password2)) {
+            mPasswordView2.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView2;
+            cancel = true;
+        }
+        if (TextUtils.isEmpty(password1)) {
+            mPasswordView1.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView1;
+            cancel = true;
+        } else if (!(isStrongPassword(password1))) {
+            mPasswordView1.setError(getString(R.string.error_password_strength));
+            focusView = mPasswordView1;
+            cancel = true;
+        }
+
         // Username verification
         // Todo: Add username requirements?
         if (TextUtils.isEmpty(username)) {
@@ -189,25 +209,6 @@ public class Register extends AppCompatActivity {
                 focusView = phoneNumberView;
                 cancel = true;
             }
-        }
-
-        // Password verification
-        if (!(password1.equals(password2))) {
-            mPasswordView2.setError(getString(R.string.error_password_must_match));
-            focusView = mPasswordView2;
-            cancel = true;
-        } else if (TextUtils.isEmpty(password2)) {
-            mPasswordView2.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView2;
-            cancel = true;
-        } else if (TextUtils.isEmpty(password1)) {
-            mPasswordView1.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView1;
-            cancel = true;
-        } else if (!(isStrongPassword(password1))) {
-            mPasswordView1.setError(getString(R.string.error_password_strength));
-            focusView = mPasswordView1;
-            cancel = true;
         }
 
         // Email verification
