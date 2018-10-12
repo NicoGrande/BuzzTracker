@@ -39,6 +39,12 @@
     <string name="error_invalid_phone_number">Please enter a valid phone number</string>
     <string name="error_invalid_name">Please enter a valid name</string>
     <string name="error_password_must_match">Passwords must match</string>
+    <string name="error_password_strength">Password must have at least:
+        8 characters,
+        an uppercase letter,
+        a lowercase letter,
+        and a number
+    </string>
     <string-array name="user_types">
         <item>User</item>
         <item>Location Employee</item>
