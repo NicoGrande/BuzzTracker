@@ -5,7 +5,7 @@ public class Admin extends User {
     private boolean locked = false;
 
     public Admin(User user) {
-        super(user.getUserName(), user.getPassWord(), user.getFirstName(), user.getLastName(), user.getEmail(),
+        super(user.getPassWord(), user.getFirstName(), user.getLastName(), user.getEmail(),
                 user.getPhoneNumber(), user.getEmployeeID());
     }
 
