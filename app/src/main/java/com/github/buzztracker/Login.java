@@ -29,9 +29,13 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +69,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     private View mProgressView;
     private View mLoginFormView;
     private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +95,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                startSignIn();
             }
         });
 
@@ -108,6 +113,73 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
         mAuth = FirebaseAuth.getInstance();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+
+                if (firebaseAuth.getCurrentUser() != null) {
+
+                        showProgress(true);
+                        startActivity(new Intent(Login.this, MainScreenActivity.class));
+                }
+
+            }
+        };
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+
+    }
+
+
+    public void startSignIn() {
+
+        String shortEmail = mEmailView.getText().toString().trim();
+        String shortPassWord = mPasswordView.getText().toString().trim();
+
+        if (TextUtils.isEmpty(shortEmail)) {
+
+            Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show();
+
+        } else if (TextUtils.isEmpty(shortPassWord)) {
+
+            Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show();
+
+        } else if (!shortEmail.contains("@") && !shortEmail.contains(".")) {
+
+            Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show();
+
+
+        } else {
+
+            mAuth.signInWithEmailAndPassword(shortEmail, shortPassWord).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+
+                    if (task.isSuccessful()) {
+
+                        showProgress(true);
+                        Intent myIntent = new Intent(Login.this, MainScreenActivity.class);
+                        Login.this.startActivity(myIntent);
+
+
+                    } else {
+
+                        Toast.makeText(Login.this, "Incorrect Username or Password.", Toast.LENGTH_LONG).show();
+
+                    }
+
+                }
+            });
+
+        }
+
+
     }
 
     private void populateAutoComplete() {
