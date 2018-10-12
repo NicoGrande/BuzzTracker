@@ -19,6 +19,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 
 public class Register extends AppCompatActivity {
@@ -41,6 +43,7 @@ public class Register extends AppCompatActivity {
     // Manages registration request
     private UserRegisterTask mRegisterTask = null;
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,12 +138,12 @@ public class Register extends AppCompatActivity {
         locationView.setError(null);
         managerView.setError(null);
 
-        String email = mEmailView.getText().toString().trim();
-        String password1 = mPasswordView1.getText().toString().trim();
+        final String email = mEmailView.getText().toString().trim();
+        final String password1 = mPasswordView1.getText().toString().trim();
         String password2 = mPasswordView2.getText().toString().trim();
-        String firstname = firstNameView.getText().toString().trim();
-        String lastname = lastNameView.getText().toString().trim();
-        String phonenumber = phoneNumberView.getText().toString().trim();
+        final String firstname = firstNameView.getText().toString().trim();
+        final String lastname = lastNameView.getText().toString().trim();
+        final String phonenumber = parsePhoneNumber(phoneNumberView.getText().toString().trim());
         String location = locationView.getText().toString().trim();
         String managername = managerView.getText().toString().trim();
         String userType = usertypeSpinner.getSelectedItem().toString().trim();
@@ -192,7 +195,6 @@ public class Register extends AppCompatActivity {
             cancel = true;
             // Regex match for only numbers
         } else {
-            phonenumber = parsePhoneNumber(phonenumber);
             if (!(isPhoneValid(phonenumber))) {
                 phoneNumberView.setError(getString(R.string.error_invalid_phone_number));
                 focusView = phoneNumberView;
@@ -241,20 +243,31 @@ public class Register extends AppCompatActivity {
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
 
+
             mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
 
                     if (task.isSuccessful()) {
 
+                        String userId = mAuth.getCurrentUser().getUid();
+
+                        User user = new User(password1, firstname, lastname, email, Long.parseLong(phonenumber));
+
+                        mDatabase.child("users").child(userId).setValue(user);
+
+
                         Intent myIntent = new Intent(Register.this, MainScreenActivity.class);
                         Register.this.startActivity(myIntent);
+                        showProgress(false);
 
 
                     } else {
 
-                        Toast.makeText(Register.this, "Incorrect Username or Password.", Toast.LENGTH_LONG).show();
-
+                        Toast.makeText(Register.this, "Account already exists with this Email.", Toast.LENGTH_LONG).show();
+                        Intent myIntent = new Intent(Register.this, Login.class);
+                        Register.this.startActivity(myIntent);
+                        showProgress(false);
                     }
 
                 }
