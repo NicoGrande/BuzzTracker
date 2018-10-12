@@ -12,10 +12,10 @@ public class User {
     private long phoneNumber;
     private int employeeID;
 
-    // email to password mapping for login
+    // email to password mapping for login until Firebase is setup
     public static HashMap<String, String> credentials = new HashMap<>();
 
-    // email to user mapping for user lookup
+    // email to user mapping for user lookup until Firebase is setup
     public static HashMap<String, User> users = new HashMap<>();
 
     public User(String UN, String PW, String firstName, String lastName, String email,
