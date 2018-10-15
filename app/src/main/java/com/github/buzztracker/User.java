@@ -18,14 +18,13 @@ public class User {
     public static HashMap<String, User> users = new HashMap<>();
 
     public User(String PW, String firstName, String lastName, String email,
-                long phoneNumber, int employeeID) {
+                long phoneNumber) {
 
         password = PW;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phoneNumber = phoneNumber;
-        this.employeeID = employeeID;
 
         credentials.put(email, password);
     }

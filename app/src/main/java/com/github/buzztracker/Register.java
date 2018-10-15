@@ -4,25 +4,24 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static android.widget.AdapterView.*;
 
 public class Register extends AppCompatActivity {
 
@@ -43,11 +42,14 @@ public class Register extends AppCompatActivity {
 
     // Manages registration request
     private UserRegisterTask mRegisterTask = null;
+    private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        mAuth = FirebaseAuth.getInstance();
 
         // Cancel button
         Button registerCancelButton = (Button) findViewById(R.id.button_cancel);
@@ -68,6 +70,7 @@ public class Register extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
+
                 attemptRegister();
             }
         });
@@ -123,6 +126,7 @@ public class Register extends AppCompatActivity {
         field.setAlpha((float) 1);
     }
 
+
     private void attemptRegister() {
         // Reset errors
         mEmailView.setError(null);
@@ -134,15 +138,15 @@ public class Register extends AppCompatActivity {
         locationView.setError(null);
         managerView.setError(null);
 
-        String email = mEmailView.getText().toString();
-        String password1 = mPasswordView1.getText().toString();
-        String password2 = mPasswordView2.getText().toString();
-        String firstname = firstNameView.getText().toString();
-        String lastname = lastNameView.getText().toString();
-        String phonenumber = phoneNumberView.getText().toString();
-        String location = locationView.getText().toString();
-        String managername = managerView.getText().toString();
-        String userType = usertypeSpinner.getSelectedItem().toString();
+        final String email = mEmailView.getText().toString().trim();
+        final String password1 = mPasswordView1.getText().toString().trim();
+        String password2 = mPasswordView2.getText().toString().trim();
+        final String firstname = firstNameView.getText().toString().trim();
+        final String lastname = lastNameView.getText().toString().trim();
+        final String phonenumber = parsePhoneNumber(phoneNumberView.getText().toString().trim());
+        String location = locationView.getText().toString().trim();
+        String managername = managerView.getText().toString().trim();
+        String userType = usertypeSpinner.getSelectedItem().toString().trim();
 
         // Allows us to cancel registration request if a field is invalid
         boolean cancel = false;
@@ -191,7 +195,6 @@ public class Register extends AppCompatActivity {
             cancel = true;
             // Regex match for only numbers
         } else {
-            phonenumber = parsePhoneNumber(phonenumber);
             if (!(isPhoneValid(phonenumber))) {
                 phoneNumberView.setError(getString(R.string.error_invalid_phone_number));
                 focusView = phoneNumberView;
@@ -239,15 +242,37 @@ public class Register extends AppCompatActivity {
         } else {
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
-            if (userType.equals("Location Employee")) {
-                mRegisterTask = new UserRegisterTask(email, password1, firstname, lastname, phonenumber,
-                        location, managername, userType);
-                mRegisterTask.execute((Void) null);
-            } else {
-                mRegisterTask = new UserRegisterTask(email, password1, firstname, lastname, phonenumber,
-                        userType);
-                mRegisterTask.execute((Void) null);
-            }
+
+
+            mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+
+                    if (task.isSuccessful()) {
+
+                        String userId = mAuth.getCurrentUser().getUid();
+
+                        User user = new User(password1, firstname, lastname, email, Long.parseLong(phonenumber));
+
+                        mDatabase.child("users").child(userId).setValue(user);
+
+
+                        Intent myIntent = new Intent(Register.this, MainScreenActivity.class);
+                        Register.this.startActivity(myIntent);
+                        showProgress(false);
+
+
+                    } else {
+
+                        Toast.makeText(Register.this, "Account already exists with this Email.", Toast.LENGTH_LONG).show();
+                        Intent myIntent = new Intent(Register.this, Login.class);
+                        Register.this.startActivity(myIntent);
+                        showProgress(false);
+                    }
+
+                }
+            });
+
         }
     }
 
@@ -341,19 +366,14 @@ public class Register extends AppCompatActivity {
 
         UserRegisterTask(String email, String password, String firstname, String lastname,
                          String phonenumber, String location, String manager, String usertype) {
-            mEmail = email;
-            mPassword = password;
-            mFirstname = firstname;
-            mLastname = lastname;
-            mPhoneNumber = phonenumber;
-            mLocation = location;
-            mManager = manager;
-            mUsertype = usertype;
-        }
-
-        UserRegisterTask(String email, String password, String firstname, String lastname,
-                         String phonenumber, String usertype) {
-            this(email, password, firstname, lastname, phonenumber, null, null, usertype);
+            mEmail = email.trim();
+            mPassword = password.trim();
+            mFirstname = firstname.trim();
+            mLastname = lastname.trim();
+            mPhoneNumber = phonenumber.trim();
+            mLocation = location.trim();
+            mManager = manager.trim();
+            mUsertype = usertype.trim();
         }
 
         @Override
@@ -363,9 +383,7 @@ public class Register extends AppCompatActivity {
             if (User.credentials.containsKey(mEmail)) {
                 return false;
             } else {
-                User.credentials.put(mEmail, mPassword);
-                User.users.put(mEmail, new User(mPassword, mFirstname, mLastname, mEmail,
-                        Long.parseLong(mPhoneNumber, 10), 0));
+                mAuth.createUserWithEmailAndPassword(mEmail, mPassword);
             }
             return true;
         }
