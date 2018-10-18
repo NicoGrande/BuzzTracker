@@ -51,4 +51,6 @@
         <item>Admin</item>
         <item>Manager</item>
     </string-array>
+    <string name="title_location_list">Locations</string>
+    <string name="title_location_detail">Location Detail</string>
 </resources>

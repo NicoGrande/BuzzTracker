@@ -6,7 +6,7 @@ public class Admin extends User {
 
     public Admin(User user) {
         super(user.getPassWord(), user.getFirstName(), user.getLastName(), user.getEmail(),
-                user.getPhoneNumber(), user.getEmployeeID());
+                user.getPhoneNumber());
     }
 
     public String itemSearch(String query) {

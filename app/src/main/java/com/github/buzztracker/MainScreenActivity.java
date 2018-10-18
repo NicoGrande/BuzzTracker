@@ -26,6 +26,15 @@ public class MainScreenActivity extends AppCompatActivity {
 
             }
         });
+
+        final Button locButton = findViewById(R.id.location);
+        locButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Intent myIntent = new Intent(MainScreenActivity.this, LocationListActivity.class);
+                MainScreenActivity.this.startActivity(myIntent);
+            }
+        });
     }
 
 }

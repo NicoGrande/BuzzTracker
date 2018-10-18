@@ -37,6 +37,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,6 +120,9 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
             }
         };
+
+        InputStream is = getResources().openRawResource(R.raw.locations);
+        CSVReader.parseCSV(is);
     }
 
     @Override

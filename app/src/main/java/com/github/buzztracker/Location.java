@@ -6,25 +6,32 @@ public class Location {
     private String locationType;
     private String longitude;
     private String latitude;
-    private int mailboxNumber;
-    private String streetName;
+    private String street;
     private String city;
     private String state;
-    private int zipCode;
-    private double phoneNumber;
+    private String zipCode;
+    private String phoneNumber;
+    private String website;
+    private String key;
 
-    public Location(String name, String type, String longitude, String latitude, int mailboxNumber,
-                    String streetName, String city, String state, int zipCode, double phoneNumber) {
+    public Location(String key, String name, String type, String longitude, String latitude,
+                    String street, String city, String state, String zipCode, String phoneNumber,
+                    String website) {
+        this.key = key;
         locationName = name;
         locationType = type;
         this.longitude = longitude;
         this.latitude = latitude;
-        this.mailboxNumber = mailboxNumber;
-        this.streetName = streetName;
+        this.street = street;
         this.city = city;
         this.state = state;
         this.zipCode = zipCode;
         this.phoneNumber = phoneNumber;
+        this.website = website;
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public String getLocationName() {
@@ -59,20 +66,12 @@ public class Location {
         this.latitude = latitude;
     }
 
-    public int getMailboxNumber() {
-        return mailboxNumber;
+    public String getStreet() {
+        return street;
     }
 
-    public void setMailboxNumber(int mailboxNumber) {
-        this.mailboxNumber = mailboxNumber;
-    }
-
-    public String getStreetName() {
-        return streetName;
-    }
-
-    public void setStreetName(String streetName) {
-        this.streetName = streetName;
+    public void setStreet(String street) {
+        this.street = street;
     }
 
     public String getCity() {
@@ -91,19 +90,38 @@ public class Location {
         this.state = state;
     }
 
-    public int getZipCode() {
+    public String getZipCode() {
         return zipCode;
     }
 
-    public void setZipCode(int zipCode) {
+    public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
     }
 
-    public double getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(double phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String toString() {
+        String allInfo = "";
+        allInfo += street + "\n" + city + ", " + state + " " + zipCode + "\n\n";
+        allInfo += "Type: " + locationType + "\n";
+        allInfo += "Website: " + website + "\n";
+        allInfo += "Phone: " + phoneNumber + "\n";
+//        allInfo += "Latitude: " + latitude + "\n";
+//        allInfo += "Longitude: " + longitude;
+        return allInfo;
     }
 }
