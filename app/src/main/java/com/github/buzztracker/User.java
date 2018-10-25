@@ -4,8 +4,7 @@ import java.util.HashMap;
 
 public class User {
 
-    private String userName;
-    private String passWord;
+    private String password;
     private String firstName;
     private String lastName;
     private String email;
@@ -18,36 +17,25 @@ public class User {
     // email to user mapping for user lookup until Firebase is setup
     public static HashMap<String, User> users = new HashMap<>();
 
-    public User(String UN, String PW, String firstName, String lastName, String email,
-                long phoneNumber, int employeeID) {
+    public User(String PW, String firstName, String lastName, String email,
+                long phoneNumber) {
 
-        userName = UN;
-        passWord = PW;
+        password = PW;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phoneNumber = phoneNumber;
-        this.employeeID = employeeID;
 
-        credentials.put(userName, passWord);
-    }
-
-    public String getUserName() {
-        return this.userName;
-    }
-
-    public void setUserName(String userName) {
-        checkData(userName);
-        this.userName = userName;
+        credentials.put(email, password);
     }
 
     public String getPassWord() {
-        return this.passWord;
+        return this.password;
     }
 
     public void setPassWord(String passWord) {
         checkData(passWord);
-        this.passWord = passWord;
+        this.password = password;
     }
 
     public String getFirstName () {
@@ -56,7 +44,7 @@ public class User {
 
     public void setFirstName(String firstName) {
         checkData(firstName);
-        this.userName = firstName;
+        this.firstName = firstName;
     }
 
     public String getLastName() {
@@ -65,7 +53,7 @@ public class User {
 
     public void setLastName(String lastName) {
         checkData(lastName);
-        this.userName = lastName;
+        this.lastName = lastName;
     }
 
     public String getEmail() {
