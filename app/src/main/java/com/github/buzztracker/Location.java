@@ -120,8 +120,8 @@ public class Location {
         allInfo += "Type: " + locationType + "\n";
         allInfo += "Website: " + website + "\n";
         allInfo += "Phone: " + phoneNumber + "\n";
-//        allInfo += "Latitude: " + latitude + "\n";
-//        allInfo += "Longitude: " + longitude;
+        allInfo += "Latitude: " + latitude + "\n";
+        allInfo += "Longitude: " + longitude;
         return allInfo;
     }
 }
