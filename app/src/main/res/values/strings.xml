@@ -26,6 +26,7 @@
     <string name="last_name">Last Name</string>
     <string name="first_name">First Name</string>
     <string name="new_password">New Password</string>
+    <string name="item_id">Item ID</string>
     <string name="repeat_new_password">Repeat New Password</string>
     <string name="email">Email</string>
     <string name="username">Username</string>
@@ -45,6 +46,13 @@
         a lowercase letter,
         and a number
     </string>
+    <string name="item_id">Item ID</string>
+    <string name="short_description">Short Description</string>
+    <string name="long_descrption">Long Descrption</string>
+    <string name="item_value">Item Value</string>
+    <string name="user_comments">User Comments</string>
+    <string name="create_item">Create Item</string>
+    <string name="cancel">Cancel</string>]
     <string-array name="user_types">
         <item>User</item>
         <item>Location Employee</item>
