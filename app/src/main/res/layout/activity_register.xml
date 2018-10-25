@@ -101,22 +101,6 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="20dp">
 
-                <AutoCompleteTextView
-                    android:id="@+id/username"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="@string/username"
-                    android:inputType="text|textEmailAddress"
-                    android:maxLines="1"
-                    android:singleLine="true" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="20dp">
-
                 <EditText
                     android:id="@+id/password1"
                     android:layout_width="match_parent"

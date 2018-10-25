@@ -39,17 +39,18 @@
     <string name="error_invalid_phone_number">Please enter a valid phone number</string>
     <string name="error_invalid_name">Please enter a valid name</string>
     <string name="error_password_must_match">Passwords must match</string>
-    <string name="user_comments">User Comments</string>
-    <string name="short_description_of_item">Short description of item.</string>
-    <string name="item_id">Item ID</string>
-    <string name="name">Name</string>
-    <string name="full_description_of_item">Full description of item.</string>
-    <string name="monetary_value_of_item">Monetary value of item.</string>
-    <string name="register_item">Register Item</string>
+    <string name="error_password_strength">Password must have at least:
+        8 characters,
+        an uppercase letter,
+        a lowercase letter,
+        and a number
+    </string>
     <string-array name="user_types">
         <item>User</item>
         <item>Location Employee</item>
         <item>Admin</item>
         <item>Manager</item>
     </string-array>
+    <string name="title_location_list">Locations</string>
+    <string name="title_location_detail">Location Detail</string>
 </resources>
