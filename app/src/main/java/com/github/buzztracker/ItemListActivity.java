@@ -15,8 +15,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.buzztracker.dummy.DummyContent;
-
 import java.util.List;
 import java.util.Locale;
 

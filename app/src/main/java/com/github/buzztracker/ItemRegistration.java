@@ -42,7 +42,7 @@ public class ItemRegistration extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(ItemRegistration.this, MainScreenActivity.class);
+                Intent i = new Intent(ItemRegistration.this, ItemListActivity.class);
                 ItemRegistration.this.startActivity(i);
             }
         });
