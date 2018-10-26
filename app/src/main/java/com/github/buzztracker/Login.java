@@ -111,13 +111,9 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-
                 if (firebaseAuth.getCurrentUser() != null) {
-
-                        showProgress(true);
                         startActivity(new Intent(Login.this, MainScreenActivity.class));
                 }
-
             }
         };
 
@@ -127,10 +123,8 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
     @Override
     protected void onStart() {
-
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
-
     }
 
 
@@ -140,43 +134,27 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         String shortPassWord = mPasswordView.getText().toString().trim();
 
         if (TextUtils.isEmpty(shortEmail)) {
-
             Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show();
-
         } else if (TextUtils.isEmpty(shortPassWord)) {
-
             Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show();
-
         } else if (!shortEmail.contains("@") && !shortEmail.contains(".")) {
-
             Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show();
-
-
         } else {
-
+            showProgress(true);
             mAuth.signInWithEmailAndPassword(shortEmail, shortPassWord).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-
                     if (task.isSuccessful()) {
-
-                        showProgress(true);
                         Intent myIntent = new Intent(Login.this, MainScreenActivity.class);
                         Login.this.startActivity(myIntent);
-
-
+                        showProgress(false);
                     } else {
-
                         Toast.makeText(Login.this, "Incorrect Username or Password.", Toast.LENGTH_LONG).show();
-
+                        showProgress(false);
                     }
-
                 }
             });
-
         }
-
-
     }
 
     private void populateAutoComplete() {

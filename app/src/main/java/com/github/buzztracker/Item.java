@@ -1,34 +1,42 @@
 package com.github.buzztracker;
 
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class Item {
 
-    private Date timestamp;
+    private static int idcounter = 0;
+    private int id;
+    private String timestamp;
     private Location location;
     private String shortDesc;
     private String fullDesc;
-    private String value;
+    private int value;
     private ItemCategory category;
     private String comment;
 
-    public Item (Location location, String shortDesc, String fullDesc, String value, ItemCategory category,
+    public Item (Location location, String shortDesc, String fullDesc, int value, ItemCategory category,
                  String comment) {
-        timestamp = Calendar.getInstance().getTime();
+        timestamp = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
         this.location = location;
         this.shortDesc = shortDesc;
         this.fullDesc = fullDesc;
         this.value = value;
         this.category = category;
         this.comment = comment;
+        id = ++idcounter;
     }
 
-    public Date getTimestamp() {
+    public Item (Location location, String shortDesc, String fullDesc, int value, ItemCategory category) {
+        this(location, shortDesc, fullDesc, value, category, "No comment provided");
+    }
+
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -56,11 +64,11 @@ public class Item {
         this.fullDesc = fullDesc;
     }
 
-    public String getValue() {
+    public int getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(int value) {
         this.value = value;
     }
 
@@ -79,4 +87,21 @@ public class Item {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public String toString() {
+        String allInfo = "";
+        allInfo += "Description: " + fullDesc + "\n";
+        allInfo += "Category: " + category + "\n";
+        allInfo += "Location: " + location.getLocationName() + "\n";
+        allInfo += "Date of donation: " + timestamp + "\n";
+        allInfo += "Value: $" + value + "\n" + "\n";
+        allInfo += "Other Comments: \n" + comment;
+
+        return allInfo;
+    }
+
 }

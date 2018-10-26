@@ -35,6 +35,15 @@ public class MainScreenActivity extends AppCompatActivity {
                 MainScreenActivity.this.startActivity(myIntent);
             }
         });
+
+        Button inventoryButton = findViewById(R.id.inventory_button);
+        inventoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainScreenActivity.this, ItemListActivity.class);
+                MainScreenActivity.this.startActivity(i);
+            }
+        });
     }
 
 }

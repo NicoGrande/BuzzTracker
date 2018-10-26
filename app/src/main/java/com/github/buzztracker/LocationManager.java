@@ -13,4 +13,22 @@ public class LocationManager {
     public static List<Location> getLocations() {
         return locations;
     }
+
+    public static List<String> getLocationNames() {
+        List<String> locationNames = new ArrayList<>();
+        for (Location l : locations) {
+            locationNames.add(l.getLocationName());
+        }
+        return locationNames;
+    }
+
+    // Returns null if location not found
+    public static Location getLocationFromName(String name) {
+        for (Location loc : locations) {
+            if (loc.getLocationName().equals(name)) {
+                return loc;
+            }
+        }
+        return null;
+    }
 }

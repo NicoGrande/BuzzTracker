@@ -31,7 +31,7 @@
         <activity
             android:name=".LocationListActivity"
             android:label="@string/title_location_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LocationDetailActivity"
             android:label="@string/title_location_detail"
@@ -40,6 +40,24 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.github.buzztracker.LocationListActivity" />
+        </activity>
+        <activity
+            android:name=".ItemListActivity"
+            android:label="@string/title_item_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".ItemDetailActivity"
+            android:label="@string/title_item_detail"
+            android:parentActivityName=".ItemListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.github.buzztracker.ItemListActivity" />
+        </activity>
+        <activity
+            android:name=".ItemRegistration"
+            android:label="Add New Item"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

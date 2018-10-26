@@ -53,4 +53,23 @@
     </string-array>
     <string name="title_location_list">Locations</string>
     <string name="title_location_detail">Location Detail</string>
+    <string name="title_item_list">Items</string>
+    <string name="title_item_detail">Item Detail</string>
+
+    <!-- String related to item registration -->
+    <string name="short_description_of_item">Short description of item</string>
+    <string name="full_description_of_item">Full description of item</string>
+    <string name="monetary_value_of_item">Item cost</string>
+    <string name="user_comments">Other comments (optional)</string>
+    <string name="create_item">Create Item</string>
+    <string name="add_item">Add Item</string>
+    <string name="error_invalid_cost">This is an invalid value</string>
+    <string-array name="item_categories">
+        <item>Clothing</item>
+        <item>Hat</item>
+        <item>Kitchen</item>
+        <item>Electronics</item>
+        <item>Household</item>
+        <item>Other</item>
+    </string-array>
 </resources>

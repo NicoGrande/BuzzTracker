@@ -20,7 +20,7 @@
         <!-- Login progress -->
 
         <ProgressBar
-            android:id="@+id/register_progress"
+            android:id="@+id/item_add_progress"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
             android:visibility="gone" />
 
         <ScrollView
-            android:id="@+id/register_form"
+            android:id="@+id/item_add_form"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -43,16 +43,6 @@
                     android:layout_height="match_parent"
                     android:layout_marginTop="20dp">
 
-                    <EditText
-                        android:id="@item_id"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:hint="@string/item_id"
-                        android:importantForAutofill="no"
-                        android:inputType="number" />
-
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -61,7 +51,7 @@
                     android:layout_marginTop="20dp">
 
                     <Spinner
-                        android:id="@+id/Item Location Spinner"
+                        android:id="@+id/item_location"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1" />
@@ -73,7 +63,7 @@
                     android:layout_marginTop="20dp">
 
                     <EditText
-                        android:id="@+id/Short Description"
+                        android:id="@+id/item_short_desc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -90,7 +80,7 @@
                     android:layout_marginTop="20dp">
 
                     <EditText
-                        android:id="@+id/full description"
+                        android:id="@+id/item_desc_long"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -106,7 +96,7 @@
                     android:layout_marginTop="20dp">
 
                     <EditText
-                        android:id="@+id/Item Value"
+                        android:id="@+id/item_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -123,7 +113,7 @@
                     android:layout_marginTop="20dp">
 
                     <Spinner
-                        android:id="@+id/Category"
+                        android:id="@+id/item_category"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1" />
@@ -135,7 +125,7 @@
                     android:layout_marginTop="20dp">
 
                     <EditText
-                        android:id="@+id/Comment"
+                        android:id="@+id/item_comment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:autofillHints=""
@@ -151,16 +141,16 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <Button
-                    android:id="@+id/register_item_button"
+                    android:id="@+id/item_create"
                     style="?android:textAppearanceSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@string/register_item"
+                    android:text="@string/add_item"
                     android:textStyle="bold" />
 
                 <Button
-                    android:id="@+id/button_cancel"
+                    android:id="@+id/item_cancel"
                     style="?android:textAppearanceSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
