@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.app.Activity;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -8,6 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Location;
 
 /**
  * A fragment representing a single Location detail screen.

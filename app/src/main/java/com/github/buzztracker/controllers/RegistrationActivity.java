@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -15,15 +15,16 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 
-public class Register extends AppCompatActivity {
+public class RegistrationActivity extends AppCompatActivity {
 
     // UI references
     private EditText mEmailView;
@@ -41,7 +42,6 @@ public class Register extends AppCompatActivity {
     private View mProgressView;
 
     // Manages registration request
-    private UserRegisterTask mRegisterTask = null;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
 
@@ -58,12 +58,12 @@ public class Register extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Register.this, Login.class);
-                Register.this.startActivity(i);
+                Intent i = new Intent(RegistrationActivity.this, LoginActivity.class);
+                RegistrationActivity.this.startActivity(i);
             }
         });
 
-        // Register button
+        // RegistrationActivity button
         Button registerCompleteButton = (Button) findViewById(R.id.register_button);
         registerCompleteButton.setOnClickListener(new View.OnClickListener() {
 
@@ -243,36 +243,25 @@ public class Register extends AppCompatActivity {
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
 
-
             mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-
                     if (task.isSuccessful()) {
-
                         String userId = mAuth.getCurrentUser().getUid();
-
                         User user = new User(password1, firstname, lastname, email, Long.parseLong(phonenumber));
-
                         mDatabase.child("users").child(userId).setValue(user);
 
-
-                        Intent myIntent = new Intent(Register.this, MainScreenActivity.class);
-                        Register.this.startActivity(myIntent);
+                        Intent myIntent = new Intent(RegistrationActivity.this, MainScreenActivity.class);
+                        RegistrationActivity.this.startActivity(myIntent);
                         showProgress(false);
-
-
                     } else {
-
-                        Toast.makeText(Register.this, "Account already exists with this Email.", Toast.LENGTH_LONG).show();
-                        Intent myIntent = new Intent(Register.this, Login.class);
-                        Register.this.startActivity(myIntent);
+                        Toast.makeText(RegistrationActivity.this, "Account already exists with this Email.", Toast.LENGTH_LONG).show();
+                        Intent myIntent = new Intent(RegistrationActivity.this, LoginActivity.class);
+                        RegistrationActivity.this.startActivity(myIntent);
                         showProgress(false);
                     }
-
                 }
             });
-
         }
     }
 
@@ -351,61 +340,5 @@ public class Register extends AppCompatActivity {
                 mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
-    }
-
-    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-        private final String mFirstname;
-        private final String mLastname;
-        private final String mPhoneNumber;
-        private final String mLocation;
-        private final String mManager;
-        private final String mUsertype;
-
-        UserRegisterTask(String email, String password, String firstname, String lastname,
-                         String phonenumber, String location, String manager, String usertype) {
-            mEmail = email.trim();
-            mPassword = password.trim();
-            mFirstname = firstname.trim();
-            mLastname = lastname.trim();
-            mPhoneNumber = phonenumber.trim();
-            mLocation = location.trim();
-            mManager = manager.trim();
-            mUsertype = usertype.trim();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            // TODO: register the new account here. Verify unique email
-            if (User.credentials.containsKey(mEmail)) {
-                return false;
-            } else {
-                mAuth.createUserWithEmailAndPassword(mEmail, mPassword);
-            }
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mRegisterTask = null;
-            showProgress(false);
-            if (success) {
-                Intent myIntent = new Intent(Register.this, MainScreenActivity.class);
-                Register.this.startActivity(myIntent);
-                ;
-            } else {
-                mEmailView.setError(getString(R.string.email_already_used));
-                mEmailView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mRegisterTask = null;
-            showProgress(false);
-        }
     }
 }

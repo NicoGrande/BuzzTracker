@@ -1,4 +1,6 @@
-package com.github.buzztracker;
+package com.github.buzztracker.model;
+
+import com.github.buzztracker.model.Location;
 
 import java.util.ArrayList;
 import java.util.List;

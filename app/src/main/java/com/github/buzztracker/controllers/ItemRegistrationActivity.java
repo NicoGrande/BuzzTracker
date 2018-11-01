@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -13,11 +13,14 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import com.github.buzztracker.model.Location;
+import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Inventory;
+import com.github.buzztracker.model.Item;
+import com.github.buzztracker.model.ItemCategory;
 
-import java.util.List;
-
-public class ItemRegistration extends AppCompatActivity {
+public class ItemRegistrationActivity extends AppCompatActivity {
 
     // UI references
     private EditText shortDescView;
@@ -42,8 +45,8 @@ public class ItemRegistration extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(ItemRegistration.this, ItemListActivity.class);
-                ItemRegistration.this.startActivity(i);
+                Intent i = new Intent(ItemRegistrationActivity.this, ItemListActivity.class);
+                ItemRegistrationActivity.this.startActivity(i);
             }
         });
 
@@ -147,9 +150,9 @@ public class ItemRegistration extends AppCompatActivity {
             }
             Inventory.addToInventory(item);
 
-            Toast.makeText(ItemRegistration.this, "Item successfully added to inventory", Toast.LENGTH_LONG).show();
-            Intent i = new Intent(ItemRegistration.this, ItemListActivity.class);
-            ItemRegistration.this.startActivity(i);
+            Toast.makeText(ItemRegistrationActivity.this, "Item successfully added to inventory", Toast.LENGTH_LONG).show();
+            Intent i = new Intent(ItemRegistrationActivity.this, ItemListActivity.class);
+            ItemRegistrationActivity.this.startActivity(i);
             showProgress(false);
         }
     }

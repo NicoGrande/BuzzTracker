@@ -1,8 +1,6 @@
-package com.github.buzztracker;
+package com.github.buzztracker.model;
 
-import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class Item {
 

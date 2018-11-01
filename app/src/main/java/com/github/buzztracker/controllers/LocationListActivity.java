@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Location;
+
 import java.util.List;
 
 /**

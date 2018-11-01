@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Inventory;
+import com.github.buzztracker.model.Item;
 
 import java.util.List;
 import java.util.Locale;
@@ -73,7 +77,7 @@ public class ItemListActivity extends AppCompatActivity {
         newItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(ItemListActivity.this, ItemRegistration.class);
+                Intent i = new Intent(ItemListActivity.this, ItemRegistrationActivity.class);
                 ItemListActivity.this.startActivity(i);
             }
         });
