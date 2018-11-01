@@ -1,7 +1,5 @@
 package com.github.buzztracker.model;
 
-import java.util.HashMap;
-
 public class User {
 
     private String password;
@@ -10,26 +8,19 @@ public class User {
     private String email;
     private long phoneNumber;
     private int employeeID;
+    boolean locked;
 
-    // email to password mapping for login until Firebase is setup
-    public static HashMap<String, String> credentials = new HashMap<>();
-
-    // email to user mapping for user lookup until Firebase is setup
-    public static HashMap<String, User> users = new HashMap<>();
-
-    public User(String PW, String firstName, String lastName, String email,
+    public User(String password, String firstName, String lastName, String email,
                 long phoneNumber) {
-
-        password = PW;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phoneNumber = phoneNumber;
-
-        credentials.put(email, password);
+        locked = false;
     }
 
-    public String getPassWord() {
+    public String getPassword() {
         return this.password;
     }
 

@@ -2,34 +2,15 @@ package com.github.buzztracker.model;
 
 public class Admin extends User {
 
-    private boolean locked = false;
-
-    public Admin(User user) {
-        super(user.getPassWord(), user.getFirstName(), user.getLastName(), user.getEmail(),
-                user.getPhoneNumber());
-    }
-
-    public String itemSearch(String query) {
-        return null;
-    }
-
-    public String locationSearch(String query) {
-        return null;
-    }
-
-    public User registerUser(User user) {
-        return null;
+    public Admin(String pw, String fName, String lName, String email, Long phoneNum) {
+        super(pw, fName, lName, email, phoneNum);
     }
 
     public void lockAcct(User user) {
-        if (!locked) {
-            locked = true;
-        }
+        user.locked = true;
     }
 
     public void unlockAcct(User user) {
-        if (locked) {
-            locked = false;
-        }
+        user.locked = false;
     }
 }

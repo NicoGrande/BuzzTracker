@@ -3,7 +3,6 @@ package com.github.buzztracker.controllers;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,12 +15,19 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.buzztracker.R;
+import com.github.buzztracker.model.Admin;
+import com.github.buzztracker.model.Location;
+import com.github.buzztracker.model.LocationEmployee;
+import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.model.Manager;
 import com.github.buzztracker.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class RegistrationActivity extends AppCompatActivity {
@@ -138,14 +144,14 @@ public class RegistrationActivity extends AppCompatActivity {
         locationView.setError(null);
         managerView.setError(null);
 
-        final String email = mEmailView.getText().toString().trim();
-        final String password1 = mPasswordView1.getText().toString().trim();
+        String email = mEmailView.getText().toString().trim();
+        String password1 = mPasswordView1.getText().toString().trim();
         String password2 = mPasswordView2.getText().toString().trim();
-        final String firstname = firstNameView.getText().toString().trim();
-        final String lastname = lastNameView.getText().toString().trim();
-        final String phonenumber = parsePhoneNumber(phoneNumberView.getText().toString().trim());
+        String firstName = firstNameView.getText().toString().trim();
+        String lastName = lastNameView.getText().toString().trim();
+        String phoneNumber = parsePhoneNumber(phoneNumberView.getText().toString().trim());
         String location = locationView.getText().toString().trim();
-        String managername = managerView.getText().toString().trim();
+        String managerName = managerView.getText().toString().trim();
         String userType = usertypeSpinner.getSelectedItem().toString().trim();
 
         // Allows us to cancel registration request if a field is invalid
@@ -154,7 +160,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
         // Manager verification
         // Todo: Add manager verification
-        if (userType.equals("Location Employee") && TextUtils.isEmpty(managername)) {
+        if (userType.equals("Location Employee") && TextUtils.isEmpty(managerName)) {
             managerView.setError(getString(R.string.error_field_required));
             focusView = managerView;
             cancel = true;
@@ -189,13 +195,13 @@ public class RegistrationActivity extends AppCompatActivity {
         }
       
         // Phone number verification
-        if (TextUtils.isEmpty(phonenumber)) {
+        if (TextUtils.isEmpty(phoneNumber)) {
             phoneNumberView.setError(getString(R.string.error_field_required));
             focusView = phoneNumberView;
             cancel = true;
             // Regex match for only numbers
         } else {
-            if (!(isPhoneValid(phonenumber))) {
+            if (!(isPhoneValid(phoneNumber))) {
                 phoneNumberView.setError(getString(R.string.error_invalid_phone_number));
                 focusView = phoneNumberView;
                 cancel = true;
@@ -214,22 +220,22 @@ public class RegistrationActivity extends AppCompatActivity {
         }
 
         // Last name verification
-        if (TextUtils.isEmpty(lastname)) {
+        if (TextUtils.isEmpty(lastName)) {
             lastNameView.setError(getString(R.string.error_field_required));
             focusView = lastNameView;
             cancel = true;
-        } else if (!(isNameLegal(lastname))) {
+        } else if (!(isNameLegal(lastName))) {
             lastNameView.setError(getString(R.string.error_invalid_name));
             focusView = lastNameView;
             cancel = true;
         }
 
         // Last name verification
-        if (TextUtils.isEmpty(firstname)) {
+        if (TextUtils.isEmpty(firstName)) {
             firstNameView.setError(getString(R.string.error_field_required));
             focusView = firstNameView;
             cancel = true;
-        } else if (!(isNameLegal(firstname))) {
+        } else if (!(isNameLegal(firstName))) {
             firstNameView.setError(getString(R.string.error_invalid_name));
             focusView = firstNameView;
             cancel = true;
@@ -243,25 +249,50 @@ public class RegistrationActivity extends AppCompatActivity {
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
 
-            mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            final AtomicBoolean success = new AtomicBoolean(false);
+
+            mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(
+                    new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
                         String userId = mAuth.getCurrentUser().getUid();
-                        User user = new User(password1, firstname, lastname, email, Long.parseLong(phonenumber));
-                        mDatabase.child("users").child(userId).setValue(user);
-
-                        Intent myIntent = new Intent(RegistrationActivity.this, MainScreenActivity.class);
-                        RegistrationActivity.this.startActivity(myIntent);
-                        showProgress(false);
-                    } else {
-                        Toast.makeText(RegistrationActivity.this, "Account already exists with this Email.", Toast.LENGTH_LONG).show();
-                        Intent myIntent = new Intent(RegistrationActivity.this, LoginActivity.class);
-                        RegistrationActivity.this.startActivity(myIntent);
-                        showProgress(false);
+                        success.set(true);
                     }
                 }
             });
+            endRegistration(password1, firstName, lastName, email, Long.parseLong(phoneNumber),
+                    userType, LocationManager.getLocationFromName(location), success.get());
+        }
+    }
+
+    private void createUser(String pw, String fName, String lName, String email, Long phoneNum,
+                            String userType, Location loc) {
+        User newUser;
+        if (userType.equals("User")) {
+            newUser = new User(pw, fName, lName, email, phoneNum);
+        } else if (userType.equals("Location Employee")) {
+            newUser = new LocationEmployee(pw, fName, lName, email, phoneNum, loc);
+        } else if (userType.equals("Admin")) {
+            newUser = new Admin(pw, fName, lName, email, phoneNum);
+        } else {
+            newUser = new Manager(pw, fName, lName, email, phoneNum);
+        }
+
+    }
+
+    private void endRegistration(String pw, String fName, String lName, String email, Long phoneNum,
+                                 String userType, Location loc, boolean success) {
+        if (success) {
+            createUser(pw, fName, lName, email, phoneNum, userType, loc);
+            Intent myIntent = new Intent(RegistrationActivity.this, MainScreenActivity.class);
+            RegistrationActivity.this.startActivity(myIntent);
+            showProgress(false);
+        } else {
+            Toast.makeText(RegistrationActivity.this, "Account already exists with this email", Toast.LENGTH_LONG).show();
+            Intent myIntent = new Intent(RegistrationActivity.this, LoginActivity.class);
+            RegistrationActivity.this.startActivity(myIntent);
+            showProgress(false);
         }
     }
 
