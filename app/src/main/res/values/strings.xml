@@ -64,6 +64,13 @@
     <string name="create_item">Create Item</string>
     <string name="add_item">Add Item</string>
     <string name="error_invalid_cost">This is an invalid value</string>
+    <string name="add_new_item">Add New Item</string>
+    <string name="return_to_main_screen">Return to Main Screen</string>
+    <string name="search">Search</string>
+    <string name="search_keywords">Search Keywords</string>
+    <string name="sort_by_category">Sort by Category</string>
+    <string name="search_by_keyword">Search by Keyword</string>
+    <string name="return_to_search">Return to search</string>
     <string-array name="item_categories">
         <item>Clothing</item>
         <item>Hat</item>

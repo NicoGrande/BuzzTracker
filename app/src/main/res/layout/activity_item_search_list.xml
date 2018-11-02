@@ -14,16 +14,10 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <Button
-            android:id="@+id/item_list_back"
+            android:id="@+id/search_list_back"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/return_to_main_screen" />
-
-        <Button
-            android:id="@+id/item_list_add_new_item"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/add_new_item" />
+            android:text="@string/return_to_search" />
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"

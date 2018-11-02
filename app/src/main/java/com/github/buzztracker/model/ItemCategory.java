@@ -13,4 +13,8 @@ public enum ItemCategory {
     ItemCategory (String cat) {
         category = cat;
     }
+
+    public String getAsString() {
+        return category;
+    }
 }

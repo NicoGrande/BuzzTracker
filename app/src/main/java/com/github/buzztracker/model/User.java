@@ -87,5 +87,4 @@ public class User {
             throw new IllegalArgumentException("Invalid input data.");
         }
     }
-
 }

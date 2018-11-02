@@ -44,7 +44,7 @@
         <activity
             android:name=".controllers.ItemListActivity"
             android:label="@string/title_item_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".controllers.ItemDetailActivity"
             android:label="@string/title_item_detail"
@@ -57,8 +57,12 @@
         <activity
             android:name=".controllers.ItemRegistrationActivity"
             android:label="Add New Item"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".controllers.SearchActivity"></activity>
+        <activity
+            android:name=".controllers.SearchListActivity"
+            android:label="Search Results"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
