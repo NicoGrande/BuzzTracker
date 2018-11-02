@@ -23,4 +23,9 @@ public class Inventory {
     public static List<Item> getFilteredInventory() {
         return filteredInventory;
     }
+
+    public static void clear() {
+        inventory.clear();
+        filteredInventory.clear();
+    }
 }
