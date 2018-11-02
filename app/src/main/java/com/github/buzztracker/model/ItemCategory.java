@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.model;
 
 public enum ItemCategory {
     CLOTHING ("Clothing"),

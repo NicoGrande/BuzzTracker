@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -15,6 +16,14 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.github.buzztracker.FirebaseConstants;
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Admin;
+import com.github.buzztracker.model.Location;
+import com.github.buzztracker.model.LocationEmployee;
+import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.model.Manager;
+import com.github.buzztracker.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -22,8 +31,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class Register extends AppCompatActivity {
+
+public class RegistrationActivity extends AppCompatActivity {
 
     // UI references
     private EditText mEmailView;
@@ -41,15 +53,18 @@ public class Register extends AppCompatActivity {
     private View mProgressView;
 
     // Manages registration request
-    private UserRegisterTask mRegisterTask = null;
+    private UserRegisterTask mReg;
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference mDatabaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance();
+        mDatabaseRef = mDatabase.getReference().child(FirebaseConstants.FIREBASE_CHILD_USERS);
 
         // Cancel button
         Button registerCancelButton = (Button) findViewById(R.id.button_cancel);
@@ -58,12 +73,12 @@ public class Register extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Register.this, Login.class);
-                Register.this.startActivity(i);
+                Intent i = new Intent(RegistrationActivity.this, LoginActivity.class);
+                RegistrationActivity.this.startActivity(i);
             }
         });
 
-        // Register button
+        // RegistrationActivity button
         Button registerCompleteButton = (Button) findViewById(R.id.register_button);
         registerCompleteButton.setOnClickListener(new View.OnClickListener() {
 
@@ -138,14 +153,14 @@ public class Register extends AppCompatActivity {
         locationView.setError(null);
         managerView.setError(null);
 
-        final String email = mEmailView.getText().toString().trim();
-        final String password1 = mPasswordView1.getText().toString().trim();
+        String email = mEmailView.getText().toString().trim();
+        String password1 = mPasswordView1.getText().toString().trim();
         String password2 = mPasswordView2.getText().toString().trim();
-        final String firstname = firstNameView.getText().toString().trim();
-        final String lastname = lastNameView.getText().toString().trim();
-        final String phonenumber = parsePhoneNumber(phoneNumberView.getText().toString().trim());
+        String firstName = firstNameView.getText().toString().trim();
+        String lastName = lastNameView.getText().toString().trim();
+        String phoneNumber = parsePhoneNumber(phoneNumberView.getText().toString().trim());
         String location = locationView.getText().toString().trim();
-        String managername = managerView.getText().toString().trim();
+        String managerName = managerView.getText().toString().trim();
         String userType = usertypeSpinner.getSelectedItem().toString().trim();
 
         // Allows us to cancel registration request if a field is invalid
@@ -154,7 +169,7 @@ public class Register extends AppCompatActivity {
 
         // Manager verification
         // Todo: Add manager verification
-        if (userType.equals("Location Employee") && TextUtils.isEmpty(managername)) {
+        if (userType.equals("Location Employee") && TextUtils.isEmpty(managerName)) {
             managerView.setError(getString(R.string.error_field_required));
             focusView = managerView;
             cancel = true;
@@ -189,13 +204,13 @@ public class Register extends AppCompatActivity {
         }
       
         // Phone number verification
-        if (TextUtils.isEmpty(phonenumber)) {
+        if (TextUtils.isEmpty(phoneNumber)) {
             phoneNumberView.setError(getString(R.string.error_field_required));
             focusView = phoneNumberView;
             cancel = true;
             // Regex match for only numbers
         } else {
-            if (!(isPhoneValid(phonenumber))) {
+            if (!(isPhoneValid(phoneNumber))) {
                 phoneNumberView.setError(getString(R.string.error_invalid_phone_number));
                 focusView = phoneNumberView;
                 cancel = true;
@@ -214,22 +229,22 @@ public class Register extends AppCompatActivity {
         }
 
         // Last name verification
-        if (TextUtils.isEmpty(lastname)) {
+        if (TextUtils.isEmpty(lastName)) {
             lastNameView.setError(getString(R.string.error_field_required));
             focusView = lastNameView;
             cancel = true;
-        } else if (!(isNameLegal(lastname))) {
+        } else if (!(isNameLegal(lastName))) {
             lastNameView.setError(getString(R.string.error_invalid_name));
             focusView = lastNameView;
             cancel = true;
         }
 
         // Last name verification
-        if (TextUtils.isEmpty(firstname)) {
+        if (TextUtils.isEmpty(firstName)) {
             firstNameView.setError(getString(R.string.error_field_required));
             focusView = firstNameView;
             cancel = true;
-        } else if (!(isNameLegal(firstname))) {
+        } else if (!(isNameLegal(firstName))) {
             firstNameView.setError(getString(R.string.error_invalid_name));
             focusView = firstNameView;
             cancel = true;
@@ -242,38 +257,115 @@ public class Register extends AppCompatActivity {
         } else {
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
-
-
-            mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-
-                    if (task.isSuccessful()) {
-
-                        String userId = mAuth.getCurrentUser().getUid();
-
-                        User user = new User(password1, firstname, lastname, email, Long.parseLong(phonenumber));
-
-                        mDatabase.child("users").child(userId).setValue(user);
-
-
-                        Intent myIntent = new Intent(Register.this, MainScreenActivity.class);
-                        Register.this.startActivity(myIntent);
-                        showProgress(false);
-
-
-                    } else {
-
-                        Toast.makeText(Register.this, "Account already exists with this Email.", Toast.LENGTH_LONG).show();
-                        Intent myIntent = new Intent(Register.this, Login.class);
-                        Register.this.startActivity(myIntent);
-                        showProgress(false);
-                    }
-
-                }
-            });
-
+            mReg = new UserRegisterTask(password1, firstName, lastName, email, Long.parseLong(phoneNumber),
+                    userType, LocationManager.getLocationFromName(location));
+            mReg.execute((Void) null);
         }
+    }
+
+    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
+
+        private String pw;
+        private String fName;
+        private String lName;
+        private String email;
+        private Long phoneNum;
+        private String userType;
+        private Location location;
+
+
+        UserRegisterTask(String pw, String fName, String lName, String email, Long phoneNum,
+                         String userType, Location location) {
+            this.pw = pw;
+            this.fName = fName;
+            this.lName = lName;
+            this.email = email;
+            this.phoneNum = phoneNum;
+            this.userType = userType;
+            this.location = location;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            // keeps track of registration progress
+            final AtomicBoolean success = new AtomicBoolean(false);
+            final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
+
+            try {
+                mAuth.createUserWithEmailAndPassword(email, pw).addOnCompleteListener(
+                        new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    String userId = mAuth.getCurrentUser().getUid();
+                                    createUser(pw, fName, lName, email, phoneNum, userType,
+                                            location);
+                                    success.set(true);
+                                    finishedAttempt.set(true);
+                                } else {
+                                    finishedAttempt.set(true);
+                                }
+                            }
+                        });
+                // waits 10 seconds to try to register with FirebaseAuth, fails if unable
+                for (int i = 0; i < 10; i++) {
+                    if (finishedAttempt.get()) {
+                        return success.get();
+                    }
+                    Thread.sleep(1000);
+                }
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return success.get();
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean taskSuccess) {
+            mReg = null;
+            showProgress(false);
+
+            if (taskSuccess) {
+                Toast.makeText(getApplicationContext(), "Account successfully created", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(RegistrationActivity.this, MainScreenActivity.class);
+                RegistrationActivity.this.startActivity(i);
+            } else {
+                Toast.makeText(getApplicationContext(), "User already exists with this email",
+                        Toast.LENGTH_LONG).show();
+            }
+            Intent i = new Intent(RegistrationActivity.this, LoginActivity.class);
+            RegistrationActivity.this.startActivity(i);
+        }
+
+        @Override
+        protected void onCancelled() {
+            mReg = null;
+            showProgress(false);
+        }
+    }
+
+    private void createUser(String pw, String fName, String lName, String email, Long phoneNum,
+                            String userType, Location loc) {
+        User newUser;
+        if (userType.equals("User")) {
+            newUser = new User(pw, fName, lName, email, phoneNum);
+        } else if (userType.equals("Location Employee")) {
+            newUser = new LocationEmployee(pw, fName, lName, email, phoneNum, loc);
+        } else if (userType.equals("Admin")) {
+            newUser = new Admin(pw, fName, lName, email, phoneNum);
+        } else {
+            newUser = new Manager(pw, fName, lName, email, phoneNum);
+        }
+
+        saveUserToFirebase(newUser, userType);
+    }
+
+    private void saveUserToFirebase(User user, String userType) {
+        mDatabaseRef = mDatabaseRef.child(userType);
+        mDatabaseRef.push().setValue(user);
+
     }
 
     // Removes -, ', and whitespace from names
@@ -351,61 +443,5 @@ public class Register extends AppCompatActivity {
                 mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
-    }
-
-    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-        private final String mFirstname;
-        private final String mLastname;
-        private final String mPhoneNumber;
-        private final String mLocation;
-        private final String mManager;
-        private final String mUsertype;
-
-        UserRegisterTask(String email, String password, String firstname, String lastname,
-                         String phonenumber, String location, String manager, String usertype) {
-            mEmail = email.trim();
-            mPassword = password.trim();
-            mFirstname = firstname.trim();
-            mLastname = lastname.trim();
-            mPhoneNumber = phonenumber.trim();
-            mLocation = location.trim();
-            mManager = manager.trim();
-            mUsertype = usertype.trim();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            // TODO: register the new account here. Verify unique email
-            if (User.credentials.containsKey(mEmail)) {
-                return false;
-            } else {
-                mAuth.createUserWithEmailAndPassword(mEmail, mPassword);
-            }
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mRegisterTask = null;
-            showProgress(false);
-            if (success) {
-                Intent myIntent = new Intent(Register.this, MainScreenActivity.class);
-                Register.this.startActivity(myIntent);
-                ;
-            } else {
-                mEmailView.setError(getString(R.string.email_already_used));
-                mEmailView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mRegisterTask = null;
-            showProgress(false);
-        }
     }
 }

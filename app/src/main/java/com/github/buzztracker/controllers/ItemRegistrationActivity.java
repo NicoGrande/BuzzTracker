@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -13,11 +13,17 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
+import com.github.buzztracker.FirebaseConstants;
+import com.github.buzztracker.model.Location;
+import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Inventory;
+import com.github.buzztracker.model.Item;
+import com.github.buzztracker.model.ItemCategory;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.List;
-
-public class ItemRegistration extends AppCompatActivity {
+public class ItemRegistrationActivity extends AppCompatActivity {
 
     // UI references
     private EditText shortDescView;
@@ -31,6 +37,9 @@ public class ItemRegistration extends AppCompatActivity {
     private View addItemView;
     private View progressView;
 
+    private FirebaseDatabase database;
+    private DatabaseReference mRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,8 +51,8 @@ public class ItemRegistration extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(ItemRegistration.this, ItemListActivity.class);
-                ItemRegistration.this.startActivity(i);
+                Intent i = new Intent(ItemRegistrationActivity.this, ItemListActivity.class);
+                ItemRegistrationActivity.this.startActivity(i);
             }
         });
 
@@ -77,6 +86,9 @@ public class ItemRegistration extends AppCompatActivity {
 
         addItemView = findViewById(R.id.item_add_form);
         progressView = findViewById(R.id.item_add_progress);
+
+        database = FirebaseDatabase.getInstance();
+        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
     }
 
     private void attemptCreateItem() {
@@ -146,12 +158,17 @@ public class ItemRegistration extends AppCompatActivity {
                 item = new Item(loc, shortDesc, longDesc, Integer.parseInt(value), category, comment);
             }
             Inventory.addToInventory(item);
+            saveItemToFirebase(item);
 
-            Toast.makeText(ItemRegistration.this, "Item successfully added to inventory", Toast.LENGTH_LONG).show();
-            Intent i = new Intent(ItemRegistration.this, ItemListActivity.class);
-            ItemRegistration.this.startActivity(i);
+            Toast.makeText(ItemRegistrationActivity.this, "Item successfully added to inventory", Toast.LENGTH_LONG).show();
+            Intent i = new Intent(ItemRegistrationActivity.this, ItemListActivity.class);
+            ItemRegistrationActivity.this.startActivity(i);
             showProgress(false);
         }
+    }
+
+    private void saveItemToFirebase(Item item) {
+        mRef.push().setValue(item);
     }
 
     private void showProgress(final boolean show) {

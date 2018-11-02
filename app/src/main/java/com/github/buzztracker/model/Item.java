@@ -1,8 +1,6 @@
-package com.github.buzztracker;
+package com.github.buzztracker.model;
 
-import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 public class Item {
 
@@ -15,6 +13,8 @@ public class Item {
     private int value;
     private ItemCategory category;
     private String comment;
+
+    public Item() {}
 
     public Item (Location location, String shortDesc, String fullDesc, int value, ItemCategory category,
                  String comment) {

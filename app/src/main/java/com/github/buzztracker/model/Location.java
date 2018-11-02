@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.model;
 
 public class Location {
 
@@ -13,6 +13,8 @@ public class Location {
     private String phoneNumber;
     private String website;
     private String key;
+
+    public Location() {}
 
     public Location(String key, String name, String type, String longitude, String latitude,
                     String street, String city, String state, String zipCode, String phoneNumber,

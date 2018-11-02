@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,22 +32,33 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.buzztracker.FirebaseConstants;
+import com.github.buzztracker.model.CSVReader;
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Inventory;
+import com.github.buzztracker.model.Item;
+import com.github.buzztracker.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -64,6 +76,8 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     private View mLoginFormView;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseDatabase database;
+    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +103,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                startSignIn();
+                attemptLogin();
             }
         });
 
@@ -99,62 +113,37 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Login.this, Register.class);
-                Login.this.startActivity(i);
+                Intent i = new Intent(LoginActivity.this, RegistrationActivity.class);
+                LoginActivity.this.startActivity(i);
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        InputStream is = getResources().openRawResource(R.raw.locations);
+        CSVReader.parseCSV(is);
+
+        database = FirebaseDatabase.getInstance();
+        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+        populateInventory();
+
         mAuth = FirebaseAuth.getInstance();
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if (firebaseAuth.getCurrentUser() != null) {
-                        startActivity(new Intent(Login.this, MainScreenActivity.class));
+                        startActivity(new Intent(LoginActivity.this, MainScreenActivity.class));
                 }
             }
         };
-
-        InputStream is = getResources().openRawResource(R.raw.locations);
-        CSVReader.parseCSV(is);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
-    }
-
-
-    public void startSignIn() {
-
-        String shortEmail = mEmailView.getText().toString().trim();
-        String shortPassWord = mPasswordView.getText().toString().trim();
-
-        if (TextUtils.isEmpty(shortEmail)) {
-            Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(shortPassWord)) {
-            Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show();
-        } else if (!shortEmail.contains("@") && !shortEmail.contains(".")) {
-            Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show();
-        } else {
-            showProgress(true);
-            mAuth.signInWithEmailAndPassword(shortEmail, shortPassWord).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        Intent myIntent = new Intent(Login.this, MainScreenActivity.class);
-                        Login.this.startActivity(myIntent);
-                        showProgress(false);
-                    } else {
-                        Toast.makeText(Login.this, "Incorrect Username or Password.", Toast.LENGTH_LONG).show();
-                        showProgress(false);
-                    }
-                }
-            });
-        }
     }
 
     private void populateAutoComplete() {
@@ -201,7 +190,6 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         }
     }
 
-
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
@@ -212,10 +200,6 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             return;
         }
 
-        // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
-
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
@@ -225,18 +209,18 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
         // Check for a valid password, if the user entered one.
         if (TextUtils.isEmpty(password)) {
-            mPasswordView.setError(getString(R.string.error_empty_password));
+            Toast.makeText(this, getString(R.string.error_field_required), Toast.LENGTH_SHORT).show();
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
+            Toast.makeText(this, getString(R.string.error_field_required), Toast.LENGTH_SHORT).show();
             focusView = mEmailView;
             cancel = true;
         } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
+            Toast.makeText(this, getString(R.string.error_invalid_email), Toast.LENGTH_SHORT).show();
             focusView = mEmailView;
             cancel = true;
         }
@@ -255,8 +239,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
+        return email.contains("@") && email.substring(email.indexOf('@')).contains(".");
     }
 
     /**
@@ -332,7 +315,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(Login.this,
+                new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -365,20 +348,37 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+            // TODO: add alternative network logins
 
+            // keeps track of Firebase authentication success
+            // is kinda weird but AtomicBoolean allows it to be modified from with lambda function
+            final AtomicBoolean success = new AtomicBoolean(false);
+            final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
+                mAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            success.set(true);
+                            finishedAttempt.set(true);
+                        } else {
+                            finishedAttempt.set(true);
+                        }
+                    }
+                });
+
+                // waits 10 seconds to try to login with FirebaseAuth, fails if unable
+                for (int i = 0; i < 10; i++) {
+                    if (finishedAttempt.get()) {
+                        return success.get();
+                    }
+                    Thread.sleep(1000);
+                }
             } catch (InterruptedException e) {
                 return false;
             }
 
-            if (User.credentials.containsKey(mEmail) && User.credentials.get(mEmail).equals(mPassword)) {
-                return true;
-            } else {
-                return false;
-            }
+            return success.get();
         }
 
         @Override
@@ -387,10 +387,10 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             showProgress(false);
 
             if (success) {
-                Intent myIntent = new Intent(Login.this, MainScreenActivity.class);
-                Login.this.startActivity(myIntent);;
+                Intent myIntent = new Intent(LoginActivity.this, MainScreenActivity.class);
+                LoginActivity.this.startActivity(myIntent);
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                Toast.makeText(getApplicationContext(), getString(R.string.error_incorrect_password), Toast.LENGTH_LONG).show();
                 mPasswordView.requestFocus();
             }
         }
@@ -400,6 +400,24 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    private void populateInventory() {
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                    Item item = postSnapshot.getValue(Item.class);
+                    Inventory.addToInventory(item);
+                    Log.d("Item loaded in: ", item.getShortDesc());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("Item read failed: ", databaseError.getMessage());
+            }
+        });
     }
 }
 

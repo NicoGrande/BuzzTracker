@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,18 +10,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
+import com.github.buzztracker.R;
+
 /**
- * An activity representing a single Location detail screen. This
+ * An activity representing a single Item detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link LocationListActivity}.
+ * in a {@link ItemListActivity}.
  */
-public class LocationDetailActivity extends AppCompatActivity {
+public class ItemDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_location_detail);
+        setContentView(R.layout.activity_item_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
@@ -53,12 +55,12 @@ public class LocationDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(LocationDetailFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(LocationDetailFragment.ARG_ITEM_ID));
-            LocationDetailFragment fragment = new LocationDetailFragment();
+            arguments.putString(ItemDetailFragment.ARG_ITEM_ID,
+                    getIntent().getStringExtra(ItemDetailFragment.ARG_ITEM_ID));
+            ItemDetailFragment fragment = new ItemDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.location_detail_container, fragment)
+                    .add(R.id.item_detail_container, fragment)
                     .commit();
         }
     }
@@ -73,7 +75,7 @@ public class LocationDetailActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            navigateUpTo(new Intent(this, LocationListActivity.class));
+            navigateUpTo(new Intent(this, ItemListActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

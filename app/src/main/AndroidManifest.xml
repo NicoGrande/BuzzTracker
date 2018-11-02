@@ -15,10 +15,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainScreenActivity" />
+        <activity android:name=".controllers.MainScreenActivity" />
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Login"
+            android:name=".controllers.LoginActivity"
             android:label="@string/title_activity_login"
             tools:ignore="WrongManifestParent">
             <intent-filter>
@@ -27,35 +27,35 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Register" />
+        <activity android:name=".controllers.RegistrationActivity" />
         <activity
-            android:name=".LocationListActivity"
+            android:name=".controllers.LocationListActivity"
             android:label="@string/title_location_list"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".LocationDetailActivity"
+            android:name=".controllers.LocationDetailActivity"
             android:label="@string/title_location_detail"
-            android:parentActivityName=".LocationListActivity"
+            android:parentActivityName=".controllers.LocationListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.github.buzztracker.LocationListActivity" />
+                android:value="com.github.buzztracker.controllers.LocationListActivity" />
         </activity>
         <activity
-            android:name=".ItemListActivity"
+            android:name=".controllers.ItemListActivity"
             android:label="@string/title_item_list"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name=".ItemDetailActivity"
+            android:name=".controllers.ItemDetailActivity"
             android:label="@string/title_item_detail"
-            android:parentActivityName=".ItemListActivity"
+            android:parentActivityName=".controllers.ItemListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.github.buzztracker.ItemListActivity" />
+                android:value="com.github.buzztracker.controllers.ItemListActivity" />
         </activity>
         <activity
-            android:name=".ItemRegistration"
+            android:name=".controllers.ItemRegistrationActivity"
             android:label="Add New Item"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

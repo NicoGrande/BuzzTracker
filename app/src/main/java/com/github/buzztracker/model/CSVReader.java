@@ -1,6 +1,9 @@
-package com.github.buzztracker;
+package com.github.buzztracker.model;
 
 import android.util.Log;
+
+import com.github.buzztracker.model.Location;
+import com.github.buzztracker.model.LocationManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;

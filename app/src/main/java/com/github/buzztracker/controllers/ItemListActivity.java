@@ -1,4 +1,4 @@
-package com.github.buzztracker;
+package com.github.buzztracker.controllers;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,32 +9,48 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+
+import com.github.buzztracker.FirebaseConstants;
+import com.github.buzztracker.R;
+import com.github.buzztracker.model.Inventory;
+import com.github.buzztracker.model.Item;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.List;
+import java.util.Locale;
 
 /**
- * An activity representing a list of Locations. This activity
+ * An activity representing a list of Items. This activity
  * has different presentations for handset and tablet-size devices. On
  * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link LocationDetailActivity} representing
+ * lead to a {@link ItemDetailActivity} representing
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class LocationListActivity extends AppCompatActivity {
+public class ItemListActivity extends AppCompatActivity {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
     private boolean mTwoPane;
+    private FirebaseDatabase database;
+    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_location_list);
+        setContentView(R.layout.activity_item_list);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -49,7 +65,7 @@ public class LocationListActivity extends AppCompatActivity {
             }
         });
 
-        if (findViewById(R.id.location_detail_container) != null) {
+        if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
             // If this view is present, then the
@@ -57,47 +73,68 @@ public class LocationListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
-        View recyclerView = findViewById(R.id.location_list);
+        Button backButton = findViewById(R.id.item_list_back);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(ItemListActivity.this, MainScreenActivity.class);
+                ItemListActivity.this.startActivity(i);
+            }
+        });
+
+        Button newItemButton = findViewById(R.id.item_list_add_new_item);
+        newItemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(ItemListActivity.this, ItemRegistrationActivity.class);
+                ItemListActivity.this.startActivity(i);
+            }
+        });
+
+        database = FirebaseDatabase.getInstance();
+        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+
+        View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, LocationManager.getLocations(), mTwoPane));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, Inventory.getInventory(), mTwoPane));
     }
 
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final LocationListActivity mParentActivity;
-        private final List<Location> mValues;
+        private final ItemListActivity mParentActivity;
+        private final List<Item> mValues;
         private final boolean mTwoPane;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Location location = (Location) view.getTag();
+                Item item = (Item) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(LocationDetailFragment.ARG_ITEM_ID, location.getKey());
-                    LocationDetailFragment fragment = new LocationDetailFragment();
+                    arguments.putString(ItemDetailFragment.ARG_ITEM_ID, "" + item.getId());
+                    ItemDetailFragment fragment = new ItemDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.location_detail_container, fragment)
+                            .replace(R.id.item_detail_container, fragment)
                             .commit();
                 } else {
                     Context context = view.getContext();
-                    Intent intent = new Intent(context, LocationDetailActivity.class);
-                    intent.putExtra(LocationDetailFragment.ARG_ITEM_ID, location.getKey());
+                    Intent intent = new Intent(context, ItemDetailActivity.class);
+                    intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, "" + item.getId());
 
                     context.startActivity(intent);
                 }
             }
         };
 
-        SimpleItemRecyclerViewAdapter(LocationListActivity parent,
-                                      List<Location> locations,
+        SimpleItemRecyclerViewAdapter(ItemListActivity parent,
+                                      List<Item> items,
                                       boolean twoPane) {
-            mValues = locations;
+            mValues = items;
             mParentActivity = parent;
             mTwoPane = twoPane;
         }
@@ -105,14 +142,14 @@ public class LocationListActivity extends AppCompatActivity {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.location_list_content, parent, false);
+                    .inflate(R.layout.item_list_content, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mKeyView.setText(mValues.get(position).getKey());
-            holder.mNameView.setText(mValues.get(position).getLocationName());
+            holder.mIdView.setText(String.format(Locale.US, "%d", mValues.get(position).getId()));
+            holder.mContentView.setText(mValues.get(position).getShortDesc());
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);
@@ -124,13 +161,13 @@ public class LocationListActivity extends AppCompatActivity {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mKeyView;
-            final TextView mNameView;
+            final TextView mIdView;
+            final TextView mContentView;
 
             ViewHolder(View view) {
                 super(view);
-                mKeyView = (TextView) view.findViewById(R.id.id_text);
-                mNameView = (TextView) view.findViewById(R.id.content);
+                mIdView = (TextView) view.findViewById(R.id.id_text);
+                mContentView = (TextView) view.findViewById(R.id.content);
             }
         }
     }
