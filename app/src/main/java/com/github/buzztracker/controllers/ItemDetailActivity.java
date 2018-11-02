@@ -9,7 +9,6 @@ import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
-
 import com.github.buzztracker.R;
 
 /**

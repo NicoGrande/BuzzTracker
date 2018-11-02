@@ -44,8 +44,6 @@ public class ItemListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
-    private FirebaseDatabase database;
-    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,9 +88,6 @@ public class ItemListActivity extends AppCompatActivity {
                 ItemListActivity.this.startActivity(i);
             }
         });
-
-        database = FirebaseDatabase.getInstance();
-        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
 
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
