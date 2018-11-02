@@ -3,10 +3,12 @@ package com.github.buzztracker.controllers;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -14,6 +16,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.github.buzztracker.FirebaseConstants;
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Admin;
 import com.github.buzztracker.model.Location;
@@ -26,11 +29,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class RegistrationActivity extends AppCompatActivity {
+
+    // Status constants
+    final int NOT_COMPLETE = 0;
+    final int COMPLETE = 1;
+    final int ERROR = 2;
 
     // UI references
     private EditText mEmailView;
@@ -48,14 +58,18 @@ public class RegistrationActivity extends AppCompatActivity {
     private View mProgressView;
 
     // Manages registration request
+    private UserRegisterTask mReg;
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference mDatabaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance();
+        mDatabaseRef = mDatabase.getReference().child(FirebaseConstants.FIREBASE_CHILD_USERS);
 
         // Cancel button
         Button registerCancelButton = (Button) findViewById(R.id.button_cancel);
@@ -248,21 +262,92 @@ public class RegistrationActivity extends AppCompatActivity {
         } else {
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
+            mReg = new UserRegisterTask(password1, firstName, lastName, email, Long.parseLong(phoneNumber),
+                    userType, LocationManager.getLocationFromName(location));
+            mReg.execute((Void) null);
+        }
+    }
 
+    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
+
+        private String pw;
+        private String fName;
+        private String lName;
+        private String email;
+        private Long phoneNum;
+        private String userType;
+        private Location location;
+
+
+        UserRegisterTask(String pw, String fName, String lName, String email, Long phoneNum,
+                         String userType, Location location) {
+            this.pw = pw;
+            this.fName = fName;
+            this.lName = lName;
+            this.email = email;
+            this.phoneNum = phoneNum;
+            this.userType = userType;
+            this.location = location;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            // keeps track of registration progress
             final AtomicBoolean success = new AtomicBoolean(false);
+            final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
 
-            mAuth.createUserWithEmailAndPassword(email, password1).addOnCompleteListener(
-                    new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        String userId = mAuth.getCurrentUser().getUid();
-                        success.set(true);
+            try {
+                mAuth.createUserWithEmailAndPassword(email, pw).addOnCompleteListener(
+                        new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    String userId = mAuth.getCurrentUser().getUid();
+                                    createUser(pw, fName, lName, email, phoneNum, userType,
+                                            location);
+                                    success.set(true);
+                                    finishedAttempt.set(true);
+                                } else {
+                                    finishedAttempt.set(true);
+                                }
+                            }
+                        });
+                // waits 10 seconds to try to register with FirebaseAuth, fails if unable
+                for (int i = 0; i < 10; i++) {
+                    if (finishedAttempt.get()) {
+                        return success.get();
                     }
+                    Thread.sleep(1000);
                 }
-            });
-            endRegistration(password1, firstName, lastName, email, Long.parseLong(phoneNumber),
-                    userType, LocationManager.getLocationFromName(location), success.get());
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return success.get();
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean taskSuccess) {
+            mReg = null;
+            showProgress(false);
+
+            if (taskSuccess) {
+                Toast.makeText(getApplicationContext(), "Account successfully created", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(RegistrationActivity.this, MainScreenActivity.class);
+                RegistrationActivity.this.startActivity(i);
+            } else {
+                Toast.makeText(getApplicationContext(), "User already exists with this email",
+                        Toast.LENGTH_LONG).show();
+            }
+            Intent i = new Intent(RegistrationActivity.this, LoginActivity.class);
+            RegistrationActivity.this.startActivity(i);
+        }
+
+        @Override
+        protected void onCancelled() {
+            mReg = null;
+            showProgress(false);
         }
     }
 
@@ -279,21 +364,11 @@ public class RegistrationActivity extends AppCompatActivity {
             newUser = new Manager(pw, fName, lName, email, phoneNum);
         }
 
+        saveUserToFirebase(newUser);
     }
 
-    private void endRegistration(String pw, String fName, String lName, String email, Long phoneNum,
-                                 String userType, Location loc, boolean success) {
-        if (success) {
-            createUser(pw, fName, lName, email, phoneNum, userType, loc);
-            Intent myIntent = new Intent(RegistrationActivity.this, MainScreenActivity.class);
-            RegistrationActivity.this.startActivity(myIntent);
-            showProgress(false);
-        } else {
-            Toast.makeText(RegistrationActivity.this, "Account already exists with this email", Toast.LENGTH_LONG).show();
-            Intent myIntent = new Intent(RegistrationActivity.this, LoginActivity.class);
-            RegistrationActivity.this.startActivity(myIntent);
-            showProgress(false);
-        }
+    private void saveUserToFirebase(User user) {
+        mDatabaseRef.push().setValue(user);
     }
 
     // Removes -, ', and whitespace from names

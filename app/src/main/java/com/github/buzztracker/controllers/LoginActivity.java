@@ -109,6 +109,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        InputStream is = getResources().openRawResource(R.raw.locations);
+        CSVReader.parseCSV(is);
+
         mAuth = FirebaseAuth.getInstance();
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -119,9 +123,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             }
         };
-
-        InputStream is = getResources().openRawResource(R.raw.locations);
-        CSVReader.parseCSV(is);
     }
 
     @Override
@@ -337,21 +338,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // keeps track of Firebase authentication success
             // is kinda weird but AtomicBoolean allows it to be modified from with lambda function
             final AtomicBoolean success = new AtomicBoolean(false);
-
+            final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
             try {
                 mAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             success.set(true);
+                            finishedAttempt.set(true);
+                        } else {
+                            finishedAttempt.set(true);
                         }
                     }
                 });
 
-                // waits 15 seconds to try to login with FirebaseAuth, fails if unable
-                Thread.sleep(15000);
+                // waits 10 seconds to try to login with FirebaseAuth, fails if unable
+                for (int i = 0; i < 10; i++) {
+                    if (finishedAttempt.get()) {
+                        return success.get();
+                    }
+                    Thread.sleep(1000);
+                }
             } catch (InterruptedException e) {
-                return success.get();
+                return false;
             }
 
             return success.get();
