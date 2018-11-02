@@ -14,6 +14,8 @@ public class Item {
     private ItemCategory category;
     private String comment;
 
+    public Item() {}
+
     public Item (Location location, String shortDesc, String fullDesc, int value, ItemCategory category,
                  String comment) {
         timestamp = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());

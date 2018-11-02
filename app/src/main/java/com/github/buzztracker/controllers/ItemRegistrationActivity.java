@@ -13,12 +13,15 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.github.buzztracker.FirebaseConstants;
 import com.github.buzztracker.model.Location;
 import com.github.buzztracker.model.LocationManager;
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Inventory;
 import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.ItemCategory;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class ItemRegistrationActivity extends AppCompatActivity {
 
@@ -33,6 +36,9 @@ public class ItemRegistrationActivity extends AppCompatActivity {
     // Allows hiding Add Item screen to show loading UI
     private View addItemView;
     private View progressView;
+
+    private FirebaseDatabase database;
+    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +86,9 @@ public class ItemRegistrationActivity extends AppCompatActivity {
 
         addItemView = findViewById(R.id.item_add_form);
         progressView = findViewById(R.id.item_add_progress);
+
+        database = FirebaseDatabase.getInstance();
+        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
     }
 
     private void attemptCreateItem() {
@@ -149,12 +158,17 @@ public class ItemRegistrationActivity extends AppCompatActivity {
                 item = new Item(loc, shortDesc, longDesc, Integer.parseInt(value), category, comment);
             }
             Inventory.addToInventory(item);
+            saveItemToFirebase(item);
 
             Toast.makeText(ItemRegistrationActivity.this, "Item successfully added to inventory", Toast.LENGTH_LONG).show();
             Intent i = new Intent(ItemRegistrationActivity.this, ItemListActivity.class);
             ItemRegistrationActivity.this.startActivity(i);
             showProgress(false);
         }
+    }
+
+    private void saveItemToFirebase(Item item) {
+        mRef.push().setValue(item);
     }
 
     private void showProgress(final boolean show) {

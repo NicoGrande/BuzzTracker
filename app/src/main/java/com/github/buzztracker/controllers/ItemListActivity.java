@@ -9,15 +9,22 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.github.buzztracker.FirebaseConstants;
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Inventory;
 import com.github.buzztracker.model.Item;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +44,8 @@ public class ItemListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
+    private FirebaseDatabase database;
+    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +90,9 @@ public class ItemListActivity extends AppCompatActivity {
                 ItemListActivity.this.startActivity(i);
             }
         });
+
+        database = FirebaseDatabase.getInstance();
+        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
 
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;

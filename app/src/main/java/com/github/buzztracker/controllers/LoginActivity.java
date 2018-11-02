@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,13 +32,21 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.buzztracker.FirebaseConstants;
 import com.github.buzztracker.model.CSVReader;
 import com.github.buzztracker.R;
+import com.github.buzztracker.model.Inventory;
+import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -67,6 +76,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseDatabase database;
+    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +123,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         InputStream is = getResources().openRawResource(R.raw.locations);
         CSVReader.parseCSV(is);
+
+        database = FirebaseDatabase.getInstance();
+        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+        populateInventory();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -385,6 +400,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    private void populateInventory() {
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                    Item item = postSnapshot.getValue(Item.class);
+                    Inventory.addToInventory(item);
+                    Log.d("Item loaded in: ", item.getShortDesc());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("Item read failed: ", databaseError.getMessage());
+            }
+        });
     }
 }
 

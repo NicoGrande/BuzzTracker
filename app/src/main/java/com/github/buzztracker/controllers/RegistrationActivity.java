@@ -37,11 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RegistrationActivity extends AppCompatActivity {
 
-    // Status constants
-    final int NOT_COMPLETE = 0;
-    final int COMPLETE = 1;
-    final int ERROR = 2;
-
     // UI references
     private EditText mEmailView;
     private EditText mPasswordView1;
@@ -364,10 +359,11 @@ public class RegistrationActivity extends AppCompatActivity {
             newUser = new Manager(pw, fName, lName, email, phoneNum);
         }
 
-        saveUserToFirebase(newUser);
+        saveUserToFirebase(newUser, userType);
     }
 
-    private void saveUserToFirebase(User user) {
+    private void saveUserToFirebase(User user, String userType) {
+        mDatabaseRef = mDatabaseRef.child(userType);
         mDatabaseRef.push().setValue(user);
 
     }
