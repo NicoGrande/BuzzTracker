@@ -369,6 +369,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
     private void saveUserToFirebase(User user) {
         mDatabaseRef.push().setValue(user);
+
     }
 
     // Removes -, ', and whitespace from names

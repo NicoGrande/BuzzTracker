@@ -8,7 +8,9 @@ public class User {
     private String email;
     private long phoneNumber;
     private int employeeID;
-    boolean locked;
+    private boolean locked;
+
+    public User() {}
 
     public User(String password, String firstName, String lastName, String email,
                 long phoneNumber) {
@@ -70,6 +72,14 @@ public class User {
 
     public void setEmployeeID(long phoneNumber) {
         this.employeeID = employeeID;
+    }
+
+    public boolean getLocked() {
+        return locked;
+    }
+
+    void setLocked(boolean status) {
+        locked = status;
     }
 
     public void checkData(String dataIn) {

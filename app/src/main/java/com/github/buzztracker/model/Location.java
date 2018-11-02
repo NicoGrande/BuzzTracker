@@ -14,6 +14,8 @@ public class Location {
     private String website;
     private String key;
 
+    public Location() {}
+
     public Location(String key, String name, String type, String longitude, String latitude,
                     String street, String city, String state, String zipCode, String phoneNumber,
                     String website) {
