@@ -208,7 +208,6 @@ public class RegistrationActivity extends AppCompatActivity {
             phoneNumberView.setError(getString(R.string.error_field_required));
             focusView = phoneNumberView;
             cancel = true;
-            // Regex match for only numbers
         } else {
             if (!(isPhoneValid(phoneNumber))) {
                 phoneNumberView.setError(getString(R.string.error_invalid_phone_number));
@@ -393,7 +392,7 @@ public class RegistrationActivity extends AppCompatActivity {
         return false;
     }
 
-    // Verifies possible email addresses with complicated regex (SO to StackOverflow)
+    // Verifies all possible email addresses with complicated regex
     private boolean isPotentialEmail(String email) {
         if (email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+" +
                 ")*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\" +

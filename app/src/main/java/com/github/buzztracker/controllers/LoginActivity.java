@@ -238,7 +238,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private boolean isEmailValid(String email) {
+    private boolean isEmailValid(@NonNull String email) {
         return email.contains("@") && email.substring(email.indexOf('@')).contains(".");
     }
 
@@ -403,6 +403,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void populateInventory() {
+        Inventory.clear();
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
