@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Location;
-import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.model.Model;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -19,10 +19,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private GoogleMap mMap;
     private List<Location> locations;
+    private Model model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        model = Model.getInstance();
+        model.updateModel(this);
+
         setContentView(R.layout.activity_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -42,45 +46,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        locations = LocationManager.getLocations();
-        Location location;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        // Add marker for AFD Station and move the camera
-        location = locations.get(0);
-        LatLng AFDStation = new LatLng(Double.parseDouble(location.getLatitude()),
-                Double.parseDouble(location.getLongitude()));
-        mMap.addMarker(new MarkerOptions().position(AFDStation).title("AFD Station"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(AFDStation));
+        locations = model.getLocations();
 
-//        // Add marker for Boys and Girls Club
-//        location = locations.get(1);
-//        LatLng boysAndGirlsClub = new LatLng(Double.parseDouble(location.getLatitude()),
-//                Double.parseDouble(location.getLongitude()));
-//        mMap.addMarker(new MarkerOptions().position(boysAndGirlsClub).title("Boys & Girls Club"));
-//
-//        // Add marker for Pathway Upper Room Christian Ministries
-//        location = locations.get(2);
-//        LatLng pathwayUpperRoomMinistries = new LatLng(Double.parseDouble(location.getLatitude()),
-//                Double.parseDouble(location.getLongitude()));
-//        mMap.addMarker(new MarkerOptions().position(pathwayUpperRoomMinistries)
-//                .title("Pathway Upper Room Christian Ministries"));
-//
-//        // Add marker for Pavilion of Hope
-//        location = locations.get(3);
-//        LatLng pavilionOfHope = new LatLng(Double.parseDouble(location.getLatitude()),
-//                Double.parseDouble(location.getLongitude()));
-//        mMap.addMarker(new MarkerOptions().position(pavilionOfHope).title("Pavilion of Hope"));
-//
-//        // Add marker for D&D Convenience Store
-//        location = locations.get(4);
-//        LatLng ddConvenienceStore = new LatLng(Double.parseDouble(location.getLatitude()),
-//                Double.parseDouble(location.getLongitude()));
-//        mMap.addMarker(new MarkerOptions().position(ddConvenienceStore).title("D&D Convenience Store"));
-//
-//        // Add marker for Keep North Fulton Beautiful
-//        location = locations.get(5);
-//        LatLng keepNorthFultonBeautiful = new LatLng(Double.parseDouble(location.getLatitude()),
-//                Double.parseDouble(location.getLongitude()));
-//        mMap.addMarker(new MarkerOptions().position(keepNorthFultonBeautiful).title("Keep North Fulton Beautiful"));
+        // Add marker for each location and move the camera
+        for (Location location : locations) {
+            LatLng locationCoords = new LatLng(Double.parseDouble(location.getLatitude()),
+                    Double.parseDouble(location.getLongitude()));
+            mMap.addMarker(new MarkerOptions()
+                    .position(locationCoords)
+                    .title(location.getLocationName())
+                    .snippet(location.getPhoneNumber()));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(locationCoords));
+        }
     }
 }
