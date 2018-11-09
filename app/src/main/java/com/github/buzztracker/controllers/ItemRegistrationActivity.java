@@ -1,11 +1,8 @@
 package com.github.buzztracker.controllers;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -13,16 +10,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.github.buzztracker.FirebaseConstants;
-import com.github.buzztracker.model.Location;
 import com.github.buzztracker.model.LocationManager;
 import com.github.buzztracker.R;
-import com.github.buzztracker.model.Inventory;
-import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.ItemCategory;
 import com.github.buzztracker.model.Model;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class ItemRegistrationActivity extends AppCompatActivity {
 
@@ -88,7 +79,7 @@ public class ItemRegistrationActivity extends AppCompatActivity {
         progressView = findViewById(R.id.item_add_progress);
 
         model = Model.getInstance();
-        model.updateModel(this);
+        model.updateContext(this);
     }
 
     private void attemptCreateItem() {
@@ -123,24 +114,7 @@ public class ItemRegistrationActivity extends AppCompatActivity {
     }
 
     private void showProgress(final boolean show) {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
         addItemView.setVisibility(show ? View.GONE : View.VISIBLE);
-        addItemView.animate().setDuration(shortAnimTime).alpha(
-                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                addItemView.setVisibility(show ? View.GONE : View.VISIBLE);
-            }
-        });
-
         progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-        progressView.animate().setDuration(shortAnimTime).alpha(
-                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        });
     }
 }

@@ -30,7 +30,6 @@ public class ItemDetailFragment extends Fragment {
      * The dummy content this fragment is presenting.
      */
     private Item item;
-
     private Model model;
 
     /**

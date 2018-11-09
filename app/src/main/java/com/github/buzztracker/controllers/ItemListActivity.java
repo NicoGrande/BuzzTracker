@@ -37,7 +37,6 @@ public class ItemListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
-
     private Model model;
 
     @Override
@@ -85,7 +84,7 @@ public class ItemListActivity extends AppCompatActivity {
         });
 
         model = Model.getInstance();
-        model.updateModel(this);
+        model.updateContext(this);
 
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
@@ -96,6 +95,9 @@ public class ItemListActivity extends AppCompatActivity {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, model.getInventory(), mTwoPane));
     }
 
+    /**
+     * Sets up the view adapter for the list of displayed items. Gets item list from inventory
+     */
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 

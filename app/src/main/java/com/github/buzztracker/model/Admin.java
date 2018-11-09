@@ -2,17 +2,20 @@ package com.github.buzztracker.model;
 
 public class Admin extends User {
 
+    /**
+     * Empty constructor required by Firebase
+     */
     public Admin() {}
 
-    public Admin(String pw, String fName, String lName, String email, Long phoneNum) {
-        super(pw, fName, lName, email, phoneNum);
+    Admin(String password, String firstName, String lastName, String email, Long phoneNum) {
+        super(password, firstName, lastName, email, phoneNum);
     }
 
-    public void lockAcct(User user) {
+    void lockAcct(User user) {
         user.setLocked(true);
     }
 
-    public void unlockAcct(User user) {
+    void unlockAcct(User user) {
         user.setLocked(false);
     }
 }

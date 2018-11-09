@@ -36,7 +36,6 @@ public class LocationListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
-
     private Model model;
 
     @Override
@@ -75,7 +74,7 @@ public class LocationListActivity extends AppCompatActivity {
         }
 
         model = Model.getInstance();
-        model.updateModel(this);
+        model.updateContext(this);
 
         View recyclerView = findViewById(R.id.location_list);
         assert recyclerView != null;
@@ -86,6 +85,9 @@ public class LocationListActivity extends AppCompatActivity {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, model.getLocations(), mTwoPane));
     }
 
+    /**
+     * Sets up the view adapter for the location list.
+     */
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 

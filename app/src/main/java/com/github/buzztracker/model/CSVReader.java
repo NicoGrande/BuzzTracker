@@ -13,7 +13,12 @@ import java.nio.charset.StandardCharsets;
 
 public class CSVReader {
 
-    public static void parseCSV(InputStream input) {
+    /**
+     * Reads in location info from a CSV file and adds locations to the location list
+     *
+     * @param input a string of comma separated strings with which to build the locations
+     */
+    static void parseCSV(InputStream input) {
         try {
             BufferedReader data = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
 

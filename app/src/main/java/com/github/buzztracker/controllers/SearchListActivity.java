@@ -1,11 +1,8 @@
 package com.github.buzztracker.controllers;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,8 +13,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.buzztracker.R;
-import com.github.buzztracker.model.Inventory;
 import com.github.buzztracker.model.Item;
+import com.github.buzztracker.model.Model;
 
 import java.util.List;
 import java.util.Locale;
@@ -56,9 +53,15 @@ public class SearchListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Inventory.getFilteredInventory()));
+        Model model = Model.getInstance();
+        model.updateContext(this);
+
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(model.getFilteredInventory()));
     }
 
+    /**
+     * Sets up the view adapter for the searched item display
+     */
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 

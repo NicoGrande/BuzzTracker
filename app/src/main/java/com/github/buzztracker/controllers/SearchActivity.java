@@ -8,10 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.github.buzztracker.R;
-import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.ItemCategory;
 import com.github.buzztracker.model.Location;
 import com.github.buzztracker.model.Model;
@@ -38,7 +36,7 @@ public class SearchActivity extends AppCompatActivity {
         categorySpinner = findViewById(R.id.search_category_spinner);
 
         model = Model.getInstance();
-        model.updateModel(this);
+        model.updateContext(this);
 
         // Populate a list of the possible item categories along with an "All categories" option
         List<String> adapterCategories = new ArrayList<>();

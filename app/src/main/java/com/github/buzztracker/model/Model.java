@@ -32,8 +32,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Model {
 
@@ -64,7 +62,7 @@ public class Model {
         inventory = Inventory.getInventory();
     }
 
-    public void updateModel(Context context) {
+    public void updateContext(Context context) {
         currentContext = context;
     }
 
@@ -112,12 +110,12 @@ public class Model {
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
-        private final String mPassword;
+        private final String email;
+        private final String password;
 
         UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
+            this.email = email;
+            this.password = password;
         }
 
         @Override
@@ -129,7 +127,7 @@ public class Model {
             final AtomicBoolean success = new AtomicBoolean(false);
             final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
             try {
-                firebaseAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
@@ -585,5 +583,9 @@ public class Model {
     private void saveIDToFirebase(int id) {
         databaseReference = databaseInstance.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
         databaseReference.setValue(id);
+    }
+
+    public List<Item> getFilteredInventory() {
+        return Inventory.getFilteredInventory();
     }
 }
