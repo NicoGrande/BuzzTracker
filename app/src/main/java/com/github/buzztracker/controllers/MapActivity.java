@@ -48,6 +48,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
+
         locations = model.getLocations();
 
         // Add marker for each location and move the camera
@@ -58,7 +59,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     .position(locationCoords)
                     .title(location.getLocationName())
                     .snippet(location.getPhoneNumber()));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(locationCoords));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationCoords, 10.0f));
         }
     }
 }
