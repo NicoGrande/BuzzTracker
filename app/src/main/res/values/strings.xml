@@ -68,7 +68,7 @@
     <string name="return_to_main_screen">Return to Main Screen</string>
     <string name="search">Search</string>
     <string name="search_keywords">Search Keywords</string>
-    <string name="sort_by_category">Sort by Category</string>
+    <string name="sort_by_category">Search by Category</string>
     <string name="search_by_keyword">Search by Keyword</string>
     <string name="return_to_search">Return to search</string>
     <string-array name="item_categories">
@@ -79,4 +79,10 @@
         <item>Household</item>
         <item>Other</item>
     </string-array>
+    <string name="title_activity_map">Map</string>
+    <string name="error_user_already_exists">User already exists with this email</string>
+    <string name="account_creation_success">Account successfully created</string>
+    <string name="login_success">Successfully logged in</string>
+    <string name="search_no_matches">No items match search criteria</string>
+    <string name="title_activity_test_maps">Map</string>
 </resources>

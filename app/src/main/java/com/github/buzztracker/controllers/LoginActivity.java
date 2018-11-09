@@ -37,6 +37,7 @@ import com.github.buzztracker.model.CSVReader;
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Inventory;
 import com.github.buzztracker.model.Item;
+import com.github.buzztracker.model.Model;
 import com.github.buzztracker.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -65,10 +66,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
+    private Model model;
+
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -76,8 +75,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseDatabase database;
-    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,12 +118,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        InputStream is = getResources().openRawResource(R.raw.locations);
-        CSVReader.parseCSV(is);
-
-        database = FirebaseDatabase.getInstance();
-        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
-        populateInventory();
+        model = Model.getInstance();
+        model.updateModel(this);
+        model.updateInventory();
+        model.updateLocations();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -138,6 +133,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             }
         };
+    }
+
+    private void attemptLogin() {
+        View focusView;
+        focusView = model.getFirstIllegalLoginField(mEmailView, mPasswordView);
+        if (focusView != null) {
+            focusView.requestFocus();
+        } else {
+            String email = mEmailView.getText().toString();
+            String password = mPasswordView.getText().toString();
+            model.verifyLogin(email, password);
+        }
     }
 
     @Override
@@ -191,62 +198,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-    private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
-        // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid password, if the user entered one.
-        if (TextUtils.isEmpty(password)) {
-            Toast.makeText(this, getString(R.string.error_field_required), Toast.LENGTH_SHORT).show();
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(this, getString(R.string.error_field_required), Toast.LENGTH_SHORT).show();
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            Toast.makeText(this, getString(R.string.error_invalid_email), Toast.LENGTH_SHORT).show();
-            focusView = mEmailView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
-        }
-    }
-
-    private boolean isEmailValid(@NonNull String email) {
-        return email.contains("@") && email.substring(email.indexOf('@')).contains(".");
-    }
-
-    /**
      * Shows the progress UI and hides the login form.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
+    public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
@@ -330,95 +285,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: add alternative network logins
-
-            // keeps track of Firebase authentication success
-            // is kinda weird but AtomicBoolean allows it to be modified from with lambda function
-            final AtomicBoolean success = new AtomicBoolean(false);
-            final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
-            try {
-                mAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            success.set(true);
-                            finishedAttempt.set(true);
-                        } else {
-                            finishedAttempt.set(true);
-                        }
-                    }
-                });
-
-                // waits 10 seconds to try to login with FirebaseAuth, fails if unable
-                for (int i = 0; i < 10; i++) {
-                    if (finishedAttempt.get()) {
-                        return success.get();
-                    }
-                    Thread.sleep(1000);
-                }
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            return success.get();
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                Intent myIntent = new Intent(LoginActivity.this, MainScreenActivity.class);
-                LoginActivity.this.startActivity(myIntent);
-            } else {
-                Toast.makeText(getApplicationContext(), getString(R.string.error_incorrect_password), Toast.LENGTH_LONG).show();
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
-
-    private void populateInventory() {
-        Inventory.clear();
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                    Item item = postSnapshot.getValue(Item.class);
-                    Inventory.addToInventory(item);
-                    Log.d("Item loaded in: ", item.getShortDesc());
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("Item read failed: ", databaseError.getMessage());
-            }
-        });
     }
 }
 

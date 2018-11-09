@@ -16,7 +16,7 @@ public class Location {
 
     public Location() {}
 
-    public Location(String key, String name, String type, String longitude, String latitude,
+    public Location(String key, String name, String type, String latitude, String longitude,
                     String street, String city, String state, String zipCode, String phoneNumber,
                     String website) {
         this.key = key;

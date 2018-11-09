@@ -27,6 +27,6 @@ public class CSVReader {
             data.close();
         } catch (IOException e) {
             Log.e("CSV Parsing", "Error reading CSV");
-    }
+        }
     }
 }

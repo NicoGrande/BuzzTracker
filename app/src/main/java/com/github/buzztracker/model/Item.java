@@ -4,7 +4,7 @@ import java.util.Calendar;
 
 public class Item {
 
-    private static int idcounter = 0;
+    static int idcounter = 0;
     private int id;
     private String timestamp;
     private Location location;
