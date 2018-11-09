@@ -20,10 +20,13 @@ import com.github.buzztracker.R;
 import com.github.buzztracker.model.Inventory;
 import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.ItemCategory;
+import com.github.buzztracker.model.Model;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class ItemRegistrationActivity extends AppCompatActivity {
+
+    private Model model;
 
     // UI references
     private EditText shortDescView;
@@ -36,9 +39,6 @@ public class ItemRegistrationActivity extends AppCompatActivity {
     // Allows hiding Add Item screen to show loading UI
     private View addItemView;
     private View progressView;
-
-    private FirebaseDatabase database;
-    private DatabaseReference mRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +87,8 @@ public class ItemRegistrationActivity extends AppCompatActivity {
         addItemView = findViewById(R.id.item_add_form);
         progressView = findViewById(R.id.item_add_progress);
 
-        database = FirebaseDatabase.getInstance();
-        mRef = database.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+        model = Model.getInstance();
+        model.updateModel(this);
     }
 
     private void attemptCreateItem() {
@@ -98,77 +98,28 @@ public class ItemRegistrationActivity extends AppCompatActivity {
         valueView.setError(null);
         commentView.setError(null);
 
-        String shortDesc = shortDescView.getText().toString().trim();
-        String longDesc = longDescView.getText().toString().trim();
-        String value = valueView.getText().toString().trim();
-        String comment = commentView.getText().toString().trim();
-        String location = locationSpinner.getSelectedItem().toString();
-        ItemCategory category = (ItemCategory) categorySpinner.getSelectedItem();
-
         // Allows us to cancel registration request if a field is invalid
-        boolean cancel = false;
-        View focusView = null;
+        View focusView = model.getFirstIllegalItemField(shortDescView, longDescView, valueView);
 
-        // Value verification
-        if (TextUtils.isEmpty(value)) {
-            valueView.setError(getString(R.string.error_field_required));
-            focusView = valueView;
-            cancel = true;
-        } else {
-            int i;
-            try {
-                i = Integer.parseInt(value);
-                if (i < 0) {
-                    valueView.setError(getString(R.string.error_invalid_cost));
-                    focusView = valueView;
-                    cancel = true;
-                }
-            } catch (NumberFormatException e) {
-                valueView.setError(getString(R.string.error_invalid_cost));
-                focusView = valueView;
-                cancel = true;
-            }
-
-        }
-
-        // Long description verification
-        if (TextUtils.isEmpty(longDesc)) {
-            longDescView.setError(getString(R.string.error_field_required));
-            focusView = longDescView;
-            cancel = true;
-        }
-
-        // Short description verification
-        if (TextUtils.isEmpty(shortDesc)) {
-            shortDescView.setError(getString(R.string.error_field_required));
-            focusView = shortDescView;
-            cancel = true;
-        }
-
-        if (cancel) {
+        if (focusView != null) {
             focusView.requestFocus();
         } else {
             showProgress(true);
 
-            Location loc = LocationManager.getLocationFromName(location);
-            Item item;
-            if (comment.isEmpty()) {
-                item = new Item(loc, shortDesc, longDesc, Integer.parseInt(value), category);
-            } else {
-                item = new Item(loc, shortDesc, longDesc, Integer.parseInt(value), category, comment);
-            }
-            Inventory.addToInventory(item);
-            saveItemToFirebase(item);
+            String shortDesc = shortDescView.getText().toString().trim();
+            String longDesc = longDescView.getText().toString().trim();
+            String value = valueView.getText().toString().trim();
+            String comment = commentView.getText().toString().trim();
+            String location = locationSpinner.getSelectedItem().toString();
+            ItemCategory category = (ItemCategory) categorySpinner.getSelectedItem();
+
+            model.addNewItem(shortDesc, longDesc, Integer.parseInt(value), comment, location, category);
 
             Toast.makeText(ItemRegistrationActivity.this, "Item successfully added to inventory", Toast.LENGTH_LONG).show();
             Intent i = new Intent(ItemRegistrationActivity.this, ItemListActivity.class);
             ItemRegistrationActivity.this.startActivity(i);
             showProgress(false);
         }
-    }
-
-    private void saveItemToFirebase(Item item) {
-        mRef.push().setValue(item);
     }
 
     private void showProgress(final boolean show) {

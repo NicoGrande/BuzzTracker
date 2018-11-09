@@ -15,9 +15,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.buzztracker.model.LocationManager;
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Location;
+import com.github.buzztracker.model.Model;
 
 import java.util.List;
 
@@ -36,6 +36,8 @@ public class LocationListActivity extends AppCompatActivity {
      * device.
      */
     private boolean mTwoPane;
+
+    private Model model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +74,16 @@ public class LocationListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
+        model = Model.getInstance();
+        model.updateModel(this);
+
         View recyclerView = findViewById(R.id.location_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, LocationManager.getLocations(), mTwoPane));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, model.getLocations(), mTwoPane));
     }
 
     public static class SimpleItemRecyclerViewAdapter

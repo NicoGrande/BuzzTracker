@@ -26,8 +26,8 @@ public class User {
         return this.password;
     }
 
-    public void setPassword(String passWord) {
-        checkData(passWord);
+    public void setPassword(String password) {
+        checkData(password);
         this.password = password;
     }
 

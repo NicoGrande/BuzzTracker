@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.github.buzztracker.model.LocationManager;
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Location;
+import com.github.buzztracker.model.Model;
 
 /**
  * A fragment representing a single Location detail screen.
@@ -31,6 +31,8 @@ public class LocationDetailFragment extends Fragment {
      */
     private Location location;
 
+    private Model model;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -42,6 +44,8 @@ public class LocationDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        model = Model.getInstance();
+
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
@@ -49,7 +53,7 @@ public class LocationDetailFragment extends Fragment {
             String bundleString = getArguments().toString();
             int idIndex = bundleString.indexOf("=");
             idIndex++;
-            location = LocationManager.getLocations().get((Integer.parseInt(
+            location = model.getLocations().get((Integer.parseInt(
                     bundleString.substring(idIndex, idIndex + 1))) - 1);
 
             Activity activity = this.getActivity();

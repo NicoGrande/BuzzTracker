@@ -11,15 +11,13 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.buzztracker.R;
-import com.github.buzztracker.model.Inventory;
 import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.ItemCategory;
 import com.github.buzztracker.model.Location;
-import com.github.buzztracker.model.LocationManager;
+import com.github.buzztracker.model.Model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -27,6 +25,8 @@ public class SearchActivity extends AppCompatActivity {
     private EditText searchTextView;
     private Spinner categorySpinner;
     private Spinner locationSpinner;
+
+    private Model model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +36,9 @@ public class SearchActivity extends AppCompatActivity {
         searchTextView = findViewById(R.id.search_text);
 
         categorySpinner = findViewById(R.id.search_category_spinner);
+
+        model = Model.getInstance();
+        model.updateModel(this);
 
         // Populate a list of the possible item categories along with an "All categories" option
         List<String> adapterCategories = new ArrayList<>();
@@ -54,7 +57,7 @@ public class SearchActivity extends AppCompatActivity {
         // Populate a list of the possible locations along with an "All locations" option
         List<String> adapterLocations = new ArrayList<>();
         adapterLocations.add("Search all locations");
-        for (Location loc : LocationManager.getLocations()) {
+        for (Location loc : model.getLocations()) {
             adapterLocations.add(loc.getLocationName());
         }
 
@@ -84,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
         sortCategoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sortByCategory();
+                searchByCategory();
             }
         });
     }
@@ -92,96 +95,12 @@ public class SearchActivity extends AppCompatActivity {
     private void searchByKeyword() {
         String searchKeywords = searchTextView.getText().toString().trim();
         String location = locationSpinner.getSelectedItem().toString();
-
-        String[] keywords = searchKeywords.split("\\s+");
-        String[] itemDescriptionWords;
-        List<Item> filteredItems = new ArrayList<>();
-
-        if (location.equals("Search all locations")) {
-            for (Item item : Inventory.getInventory()) {
-                itemDescriptionWords = getDescriptionKeywords(item);
-                outerLoop:
-                for (int i = 0; i < keywords.length; i++) {
-                    for (int j = 0; j < itemDescriptionWords.length; j++) {
-                        if (keywords[i].equals(itemDescriptionWords[j])) {
-                            filteredItems.add(item);
-                            break outerLoop;
-                        }
-                    }
-                }
-            }
-        } else {
-            for (Item item : Inventory.getInventory()) {
-                if (item.getLocation().getLocationName().equals(location)) {
-                    itemDescriptionWords = getDescriptionKeywords(item);
-                    outerLoop:
-                    for (int i = 0; i < keywords.length; i++) {
-                        for (int j = 0; j < itemDescriptionWords.length; j++) {
-                            if (keywords[i].equals(itemDescriptionWords[j])) {
-                                filteredItems.add(item);
-                                break outerLoop;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        displayResults(filteredItems);
+        model.searchByKeyword(searchKeywords, location);
     }
 
-    private void sortByCategory() {
-        ItemCategory category = getCategory(categorySpinner.getSelectedItem().toString());
+    private void searchByCategory() {
+        ItemCategory category = model.getCategory(categorySpinner.getSelectedItem().toString());
         String location = locationSpinner.getSelectedItem().toString();
-
-        List<Item> filteredItems = new ArrayList<>();
-
-        if (location.equals("Search all locations")) {
-            for (Item item : Inventory.getInventory()) {
-                // if searching all categories
-                if (category == null) {
-                    filteredItems.add(item);
-                } else if (item.getCategory() == category) {
-                    filteredItems.add(item);
-                }
-            }
-        } else {
-            for (Item item : Inventory.getInventory()) {
-                if (item.getLocation().getLocationName().equals(location)) {
-                    if (category == null) {
-                        filteredItems.add(item);
-                    } else if (item.getCategory() == category) {
-                        filteredItems.add(item);
-                    }
-                }
-            }
-        }
-        displayResults(filteredItems);
-    }
-
-    private String[] getDescriptionKeywords(Item item) {
-        String description = item.getFullDesc() + " " + item.getShortDesc();
-        return description.split("\\s+");
-    }
-
-    private ItemCategory getCategory(String cat) {
-        if (cat.equals("Search all categories")) {
-            return null;
-        }
-        for (ItemCategory ic : ItemCategory.values()) {
-            if (ic.getAsString().equals(cat)) {
-                return ic;
-            }
-        }
-        return null;
-    }
-
-    private void displayResults(List<Item> items) {
-        if (items.size() == 0) {
-            Toast.makeText(this, "No items match search criteria", Toast.LENGTH_LONG).show();
-        } else {
-            Inventory.setFilteredInventory(items);
-            Intent i = new Intent(SearchActivity.this, SearchListActivity.class);
-            SearchActivity.this.startActivity(i);
-        }
+        model.searchByCategory(category, location);
     }
 }
