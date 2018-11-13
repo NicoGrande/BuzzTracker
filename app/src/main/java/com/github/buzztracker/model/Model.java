@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -32,8 +33,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Model {
 
@@ -48,24 +47,30 @@ public class Model {
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase databaseInstance;
     private DatabaseReference databaseReference;
-    private User currentUser;
     private List<Item> inventory;
     private List<Location> locations;
 
     private Model() {
         currentContext = null;
-        databaseInstance = FirebaseDatabase.getInstance();
-        databaseReference = databaseInstance.getReference();
-        firebaseAuth = FirebaseAuth.getInstance();
-        currentUser = null;
 
-        getInitialItemId();
-        populateInventory();
-        inventory = Inventory.getInventory();
+        initializeModel();
+        updateInventory();
     }
 
-    public void updateModel(Context context) {
+    public void updateContext(Context context) {
         currentContext = context;
+    }
+
+    // Sets up the model; only throws the exception in JUnit test states
+    private void initializeModel() {
+        try {
+            databaseInstance = FirebaseDatabase.getInstance();
+            databaseReference = databaseInstance.getReference();
+            firebaseAuth = FirebaseAuth.getInstance();
+
+            getInitialItemId();
+            populateInventory();
+        } catch (ExceptionInInitializerError ignored) {}
     }
 
     public View getFirstIllegalLoginField(AutoCompleteTextView emailView, EditText passwordView) {
@@ -112,12 +117,12 @@ public class Model {
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
-        private final String mPassword;
+        private final String email;
+        private final String password;
 
         UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
+            this.email = email;
+            this.password = password;
         }
 
         @Override
@@ -129,7 +134,7 @@ public class Model {
             final AtomicBoolean success = new AtomicBoolean(false);
             final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
             try {
-                firebaseAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
@@ -185,7 +190,7 @@ public class Model {
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     Item item = postSnapshot.getValue(Item.class);
                     Inventory.addToInventory(item);
-                    Log.d("Item loaded in: ", item.getShortDesc());
+                    Log.d("Item loaded in: ", item != null ? item.getShortDesc() : null);
                 }
             }
 
@@ -232,8 +237,9 @@ public class Model {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
                                     String userId = firebaseAuth.getCurrentUser().getUid();
-                                    createUser(password, firstName, lastName, email, phoneNum, userType,
+                                    User newUser = createUser(password, firstName, lastName, email, phoneNum, userType,
                                             location);
+                                    saveUserToFirebase(newUser, userType);
                                     success.set(true);
                                     finishedAttempt.set(true);
                                 } else {
@@ -288,6 +294,7 @@ public class Model {
         String firstName = firstNameView.getText().toString().trim();
         String lastName = lastNameView.getText().toString().trim();
         String phoneNumber = Verification.parsePhoneNumber(phoneNumView.getText().toString().trim());
+        phoneNumber = Verification.removeCommonNameChars(phoneNumber);
         String location = locationView.getText().toString().trim();
         String managerName = managerView.getText().toString().trim();
         String userType = userTypeSpinner.getSelectedItem().toString().trim();
@@ -376,7 +383,7 @@ public class Model {
         userRegisterTask.execute((Void) null);
     }
 
-    private void createUser(String pw, String fName, String lName, String email, Long phoneNum,
+    public User createUser(String pw, String fName, String lName, String email, Long phoneNum,
                             String userType, Location loc) {
         User newUser;
         if (userType.equals("User")) {
@@ -385,11 +392,13 @@ public class Model {
             newUser = new LocationEmployee(pw, fName, lName, email, phoneNum, loc);
         } else if (userType.equals("Admin")) {
             newUser = new Admin(pw, fName, lName, email, phoneNum);
-        } else {
+        } else if (userType.equals("Manager")){
             newUser = new Manager(pw, fName, lName, email, phoneNum);
+        } else {
+            throw new IllegalArgumentException("Invalid user type");
         }
 
-        saveUserToFirebase(newUser, userType);
+        return newUser;
     }
 
     private void saveUserToFirebase(User user, String userType) {
@@ -571,7 +580,7 @@ public class Model {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Item.idcounter = (int) ((long) dataSnapshot.getValue());
+                Item.idCounter = (int) ((long) dataSnapshot.getValue());
                 Log.d("Last item ID loaded: ", "" + dataSnapshot.getValue());
             }
 
@@ -585,5 +594,9 @@ public class Model {
     private void saveIDToFirebase(int id) {
         databaseReference = databaseInstance.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
         databaseReference.setValue(id);
+    }
+
+    public List<Item> getFilteredInventory() {
+        return Inventory.getFilteredInventory();
     }
 }

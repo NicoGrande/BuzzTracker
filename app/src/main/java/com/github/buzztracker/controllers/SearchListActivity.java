@@ -1,11 +1,8 @@
 package com.github.buzztracker.controllers;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,8 +13,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.buzztracker.R;
-import com.github.buzztracker.model.Inventory;
 import com.github.buzztracker.model.Item;
+import com.github.buzztracker.model.Model;
 
 import java.util.List;
 import java.util.Locale;
@@ -37,7 +34,7 @@ public class SearchListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_search_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
@@ -56,9 +53,14 @@ public class SearchListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(Inventory.getFilteredInventory()));
+        Model model = Model.getInstance();
+
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(model.getFilteredInventory()));
     }
 
+    /**
+     * Sets up the view adapter for the searched item display
+     */
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
@@ -68,6 +70,7 @@ public class SearchListActivity extends AppCompatActivity {
             mValues = items;
         }
 
+        @NonNull
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
@@ -94,8 +97,8 @@ public class SearchListActivity extends AppCompatActivity {
 
             ViewHolder(View view) {
                 super(view);
-                mIdView = (TextView) view.findViewById(R.id.id_text);
-                mContentView = (TextView) view.findViewById(R.id.content);
+                mIdView = view.findViewById(R.id.id_text);
+                mContentView = view.findViewById(R.id.content);
             }
         }
     }

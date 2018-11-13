@@ -7,7 +7,6 @@ public class User {
     private String lastName;
     private String email;
     private long phoneNumber;
-    private int employeeID;
     private boolean locked;
 
     public User() {}
@@ -64,14 +63,6 @@ public class User {
 
     public void setPhoneNumber(long phoneNumber) {
         this.phoneNumber = phoneNumber;
-    }
-
-    public int getEmployeeID() {
-        return this.employeeID;
-    }
-
-    public void setEmployeeID(long phoneNumber) {
-        this.employeeID = employeeID;
     }
 
     public boolean getLocked() {

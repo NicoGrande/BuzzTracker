@@ -1,5 +1,7 @@
 package com.github.buzztracker.model;
 
+import android.support.annotation.NonNull;
+
 public class Location {
 
     private String locationName;
@@ -116,6 +118,7 @@ public class Location {
         this.website = website;
     }
 
+    @NonNull
     public String toString() {
         String allInfo = "";
         allInfo += street + "\n" + city + ", " + state + " " + zipCode + "\n\n";
