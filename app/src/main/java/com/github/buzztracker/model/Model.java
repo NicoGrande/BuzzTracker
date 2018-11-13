@@ -52,17 +52,25 @@ public class Model {
 
     private Model() {
         currentContext = null;
-        databaseInstance = FirebaseDatabase.getInstance();
-        databaseReference = databaseInstance.getReference();
-        firebaseAuth = FirebaseAuth.getInstance();
 
-        getInitialItemId();
-        populateInventory();
+        initializeModel();
         updateInventory();
     }
 
     public void updateContext(Context context) {
         currentContext = context;
+    }
+
+    // Sets up the model; only throws the exception in JUnit test states
+    private void initializeModel() {
+        try {
+            databaseInstance = FirebaseDatabase.getInstance();
+            databaseReference = databaseInstance.getReference();
+            firebaseAuth = FirebaseAuth.getInstance();
+
+            getInitialItemId();
+            populateInventory();
+        } catch (ExceptionInInitializerError ignored) {}
     }
 
     public View getFirstIllegalLoginField(AutoCompleteTextView emailView, EditText passwordView) {
@@ -229,8 +237,9 @@ public class Model {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
                                     String userId = firebaseAuth.getCurrentUser().getUid();
-                                    createUser(password, firstName, lastName, email, phoneNum, userType,
+                                    User newUser = createUser(password, firstName, lastName, email, phoneNum, userType,
                                             location);
+                                    saveUserToFirebase(newUser, userType);
                                     success.set(true);
                                     finishedAttempt.set(true);
                                 } else {
@@ -374,7 +383,7 @@ public class Model {
         userRegisterTask.execute((Void) null);
     }
 
-    private void createUser(String pw, String fName, String lName, String email, Long phoneNum,
+    public User createUser(String pw, String fName, String lName, String email, Long phoneNum,
                             String userType, Location loc) {
         User newUser;
         if (userType.equals("User")) {
@@ -383,11 +392,13 @@ public class Model {
             newUser = new LocationEmployee(pw, fName, lName, email, phoneNum, loc);
         } else if (userType.equals("Admin")) {
             newUser = new Admin(pw, fName, lName, email, phoneNum);
-        } else {
+        } else if (userType.equals("Manager")){
             newUser = new Manager(pw, fName, lName, email, phoneNum);
+        } else {
+            throw new IllegalArgumentException("Invalid user type");
         }
 
-        saveUserToFirebase(newUser, userType);
+        return newUser;
     }
 
     private void saveUserToFirebase(User user, String userType) {
