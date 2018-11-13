@@ -1,10 +1,12 @@
 package com.github.buzztracker.model;
 
+import android.support.annotation.NonNull;
+
 import java.util.Calendar;
 
 public class Item {
 
-    static int idcounter = 0;
+    static int idCounter = 0;
     private int id;
     private String timestamp;
     private Location location;
@@ -25,7 +27,7 @@ public class Item {
         this.value = value;
         this.category = category;
         this.comment = comment;
-        id = ++idcounter;
+        id = ++idCounter;
     }
 
     public Item (Location location, String shortDesc, String fullDesc, int value, ItemCategory category) {
@@ -92,6 +94,7 @@ public class Item {
         return id;
     }
 
+    @NonNull
     public String toString() {
         String allInfo = "";
         allInfo += "Description: " + fullDesc + "\n";

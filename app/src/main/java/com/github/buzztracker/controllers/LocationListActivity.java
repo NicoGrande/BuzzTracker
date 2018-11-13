@@ -43,11 +43,11 @@ public class LocationListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -124,6 +124,7 @@ public class LocationListActivity extends AppCompatActivity {
             mTwoPane = twoPane;
         }
 
+        @NonNull
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
@@ -151,8 +152,8 @@ public class LocationListActivity extends AppCompatActivity {
 
             ViewHolder(View view) {
                 super(view);
-                mKeyView = (TextView) view.findViewById(R.id.id_text);
-                mNameView = (TextView) view.findViewById(R.id.content);
+                mKeyView = view.findViewById(R.id.id_text);
+                mNameView = view.findViewById(R.id.content);
             }
         }
     }

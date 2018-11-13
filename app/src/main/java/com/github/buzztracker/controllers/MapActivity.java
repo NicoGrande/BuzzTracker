@@ -31,6 +31,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
     }
 
@@ -50,6 +51,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         locations = model.getLocations();
 
+        final float DEFAULT_ZOOM = 10.0f;
+
         // Add marker for each location and move the camera
         for (Location location : locations) {
             LatLng locationCoords = new LatLng(Double.parseDouble(location.getLatitude()),
@@ -58,7 +61,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     .position(locationCoords)
                     .title(location.getLocationName())
                     .snippet(location.getPhoneNumber()));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationCoords, 10.0f));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationCoords, DEFAULT_ZOOM));
         }
     }
 }

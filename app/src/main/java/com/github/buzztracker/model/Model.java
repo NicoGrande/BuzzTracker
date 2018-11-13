@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -46,7 +47,6 @@ public class Model {
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase databaseInstance;
     private DatabaseReference databaseReference;
-    private User currentUser;
     private List<Item> inventory;
     private List<Location> locations;
 
@@ -55,11 +55,10 @@ public class Model {
         databaseInstance = FirebaseDatabase.getInstance();
         databaseReference = databaseInstance.getReference();
         firebaseAuth = FirebaseAuth.getInstance();
-        currentUser = null;
 
         getInitialItemId();
         populateInventory();
-        inventory = Inventory.getInventory();
+        updateInventory();
     }
 
     public void updateContext(Context context) {
@@ -183,7 +182,7 @@ public class Model {
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     Item item = postSnapshot.getValue(Item.class);
                     Inventory.addToInventory(item);
-                    Log.d("Item loaded in: ", item.getShortDesc());
+                    Log.d("Item loaded in: ", item != null ? item.getShortDesc() : null);
                 }
             }
 
@@ -286,6 +285,7 @@ public class Model {
         String firstName = firstNameView.getText().toString().trim();
         String lastName = lastNameView.getText().toString().trim();
         String phoneNumber = Verification.parsePhoneNumber(phoneNumView.getText().toString().trim());
+        phoneNumber = Verification.removeCommonNameChars(phoneNumber);
         String location = locationView.getText().toString().trim();
         String managerName = managerView.getText().toString().trim();
         String userType = userTypeSpinner.getSelectedItem().toString().trim();
@@ -569,7 +569,7 @@ public class Model {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Item.idcounter = (int) ((long) dataSnapshot.getValue());
+                Item.idCounter = (int) ((long) dataSnapshot.getValue());
                 Log.d("Last item ID loaded: ", "" + dataSnapshot.getValue());
             }
 

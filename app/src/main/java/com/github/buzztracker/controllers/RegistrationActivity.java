@@ -43,7 +43,7 @@ public class RegistrationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         // Cancel button
-        Button registerCancelButton = (Button) findViewById(R.id.button_cancel);
+        Button registerCancelButton = findViewById(R.id.button_cancel);
         registerCancelButton.setOnClickListener(new View.OnClickListener() {
 
 
@@ -55,7 +55,7 @@ public class RegistrationActivity extends AppCompatActivity {
         });
 
         // RegistrationActivity button
-        Button registerCompleteButton = (Button) findViewById(R.id.register_button);
+        Button registerCompleteButton = findViewById(R.id.register_button);
         registerCompleteButton.setOnClickListener(new View.OnClickListener() {
 
 
@@ -67,7 +67,7 @@ public class RegistrationActivity extends AppCompatActivity {
         });
 
         // Set up User type spinner
-        userTypeSpinner = (Spinner) findViewById(R.id.user_type);
+        userTypeSpinner = findViewById(R.id.user_type);
         ArrayAdapter<CharSequence> userTypeAdapter = ArrayAdapter.createFromResource(this,
                 R.array.user_types, android.R.layout.simple_spinner_item);
         userTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -108,9 +108,11 @@ public class RegistrationActivity extends AppCompatActivity {
 
     // Disables a passed in EditText field from being edited
     private void disableField(EditText field) {
+        final float SEMI_TRANSPARENT = 0.5f;
+
         field.setEnabled(false);
         field.setFocusable(false);
-        field.setAlpha((float) .5);
+        field.setAlpha(SEMI_TRANSPARENT);
     }
 
     // Enables a passed in EditText field to be edited
