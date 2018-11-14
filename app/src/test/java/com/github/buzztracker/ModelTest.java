@@ -43,7 +43,7 @@ public class ModelTest {
 
         for (int i = 0; i < userTypes.length; i++) {
             user = model.createUser(password, firstName, lastName, email, phoneNumber, userTypes[i], location);
-            assertTrue("Created user of incorrect type", user.getClass().equals(classes[i]));
+            assertEquals("Created user of incorrect type", user.getClass(), classes[i]);
             assertEquals("Provided password is incorrect", password, user.getPassword());
             assertEquals("Provided first name is incorrect", firstName, user.getFirstName());
             assertEquals("Provided last name is incorrect", lastName, user.getLastName());
