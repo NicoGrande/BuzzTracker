@@ -1,7 +1,5 @@
 <resources>
     <!--
-    TODO: Before you run your application, you need a Google Maps API key.
-
     To get one, follow this link, follow the directions and press "Create" at the end:
 
     https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=23:F5:36:8F:A5:9D:7E:4A:55:7F:34:3D:D0:CE:9F:DB:CE:9F:74:5C%3Bcom.github.buzztracker.controllers

@@ -18,9 +18,11 @@ public class Item {
 
     public Item() {}
 
-    public Item (Location location, String shortDesc, String fullDesc, int value, ItemCategory category,
-                 String comment) {
-        timestamp = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
+    public Item (Location location, String shortDesc, String fullDesc, int value,
+                 ItemCategory category, String comment) {
+        timestamp = java.text.DateFormat
+                .getDateTimeInstance()
+                .format(Calendar.getInstance().getTime());
         this.location = location;
         this.shortDesc = shortDesc;
         this.fullDesc = fullDesc;
@@ -30,7 +32,8 @@ public class Item {
         id = ++idCounter;
     }
 
-    public Item (Location location, String shortDesc, String fullDesc, int value, ItemCategory category) {
+    public Item (Location location, String shortDesc, String fullDesc, int value,
+                 ItemCategory category) {
         this(location, shortDesc, fullDesc, value, category, "No comment provided");
     }
 

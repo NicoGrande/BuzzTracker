@@ -32,8 +32,6 @@ public class LocationDetailFragment extends Fragment {
      */
     private Location location;
 
-    private Model model;
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -45,7 +43,7 @@ public class LocationDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        model = Model.getInstance();
+        Model model = Model.getInstance();
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             // Load the dummy content specified by the fragment

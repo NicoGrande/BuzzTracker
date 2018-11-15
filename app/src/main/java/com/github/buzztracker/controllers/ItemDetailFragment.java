@@ -31,7 +31,6 @@ public class ItemDetailFragment extends Fragment {
      * The dummy content this fragment is presenting.
      */
     private Item item;
-    private Model model;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -44,7 +43,7 @@ public class ItemDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        model = Model.getInstance();
+        Model model = Model.getInstance();
 
         if (getArguments() != null && getArguments().containsKey(ARG_ITEM_ID)) {
             // Load the dummy content specified by the fragment

@@ -17,15 +17,12 @@ import java.util.List;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
-    private List<Location> locations;
     private Model model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         model = Model.getInstance();
-        model.updateContext(this);
 
         setContentView(R.layout.activity_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -45,11 +42,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        GoogleMap mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
 
-        locations = model.getLocations();
+        List<Location> locations = model.getLocations();
 
         final float DEFAULT_ZOOM = 10.0f;
 

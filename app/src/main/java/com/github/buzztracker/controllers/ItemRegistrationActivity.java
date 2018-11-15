@@ -79,7 +79,6 @@ public class ItemRegistrationActivity extends AppCompatActivity {
         progressView = findViewById(R.id.item_add_progress);
 
         model = Model.getInstance();
-        model.updateContext(this);
     }
 
     private void attemptCreateItem() {
@@ -90,7 +89,7 @@ public class ItemRegistrationActivity extends AppCompatActivity {
         commentView.setError(null);
 
         // Allows us to cancel registration request if a field is invalid
-        View focusView = model.getFirstIllegalItemField(shortDescView, longDescView, valueView);
+        View focusView = model.getFirstIllegalItemField(shortDescView, longDescView, valueView, this);
 
         if (focusView != null) {
             focusView.requestFocus();
@@ -104,10 +103,13 @@ public class ItemRegistrationActivity extends AppCompatActivity {
             String location = locationSpinner.getSelectedItem().toString();
             ItemCategory category = (ItemCategory) categorySpinner.getSelectedItem();
 
-            model.addNewItem(shortDesc, longDesc, Integer.parseInt(value), comment, location, category);
+            model.addNewItem(shortDesc, longDesc, Integer.parseInt(value), comment, location,
+                    category);
 
-            Toast.makeText(ItemRegistrationActivity.this, "Item successfully added to inventory", Toast.LENGTH_LONG).show();
-            Intent i = new Intent(ItemRegistrationActivity.this, ItemListActivity.class);
+            Toast.makeText(ItemRegistrationActivity.this, "Item successfully added to inventory",
+                    Toast.LENGTH_LONG).show();
+            Intent i = new Intent(ItemRegistrationActivity.this,
+                    ItemListActivity.class);
             ItemRegistrationActivity.this.startActivity(i);
             showProgress(false);
         }

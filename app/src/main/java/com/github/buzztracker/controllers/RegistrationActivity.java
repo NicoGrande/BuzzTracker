@@ -103,7 +103,6 @@ public class RegistrationActivity extends AppCompatActivity {
         progressView = findViewById(R.id.register_progress);
 
         model = Model.getInstance();
-        model.updateContext(this);
     }
 
     // Disables a passed in EditText field from being edited
@@ -133,8 +132,9 @@ public class RegistrationActivity extends AppCompatActivity {
         locationView.setError(null);
         managerView.setError(null);
 
-        View focusView = model.getFirstIllegalRegistrationField(emailView, passwordView1, passwordView2,
-                firstNameView, lastNameView, phoneNumberView, locationView, managerView, userTypeSpinner);
+        View focusView = model.getFirstIllegalRegistrationField(
+                emailView, passwordView1, passwordView2, firstNameView, lastNameView,
+                phoneNumberView, locationView, managerView, userTypeSpinner, this);
 
         if (focusView != null) {
             // There was an error or invalid field; cancel registration attempt and focus
@@ -151,7 +151,7 @@ public class RegistrationActivity extends AppCompatActivity {
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
             model.addNewUser(password, firstName, lastName, email, Long.parseLong(phoneNumber),
-                    userType, LocationManager.getLocationFromName(location));
+                    userType, LocationManager.getLocationFromName(location), this);
         }
     }
 

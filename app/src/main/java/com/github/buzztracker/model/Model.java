@@ -43,7 +43,6 @@ public class Model {
 
     private UserLoginTask userLoginTask;
     private UserRegisterTask userRegisterTask;
-    private Context currentContext;
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase databaseInstance;
     private DatabaseReference databaseReference;
@@ -51,14 +50,9 @@ public class Model {
     private List<Location> locations;
 
     private Model() {
-        currentContext = null;
 
         initializeModel();
         updateInventory();
-    }
-
-    public void updateContext(Context context) {
-        currentContext = context;
     }
 
     // Sets up the model; only throws the exception in JUnit test states
@@ -70,25 +64,30 @@ public class Model {
 
             getInitialItemId();
             populateInventory();
-        } catch (ExceptionInInitializerError ignored) {}
+        } catch (ExceptionInInitializerError error) {
+            Log.e("Model initialization", error.getMessage());
+        }
     }
 
-    public View getFirstIllegalLoginField(AutoCompleteTextView emailView, EditText passwordView) {
+    public View getFirstIllegalLoginField(AutoCompleteTextView emailView, EditText passwordView, Context context) {
         String email = emailView.getText().toString();
         String password = passwordView.getText().toString();
         View focusView = null;
 
         if (TextUtils.isEmpty(password)) {
-            Toast.makeText(currentContext, R.string.error_field_required, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.error_field_required,
+                    Toast.LENGTH_SHORT).show();
             focusView = passwordView;
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            Toast.makeText(currentContext, R.string.error_field_required, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.error_field_required,
+                    Toast.LENGTH_SHORT).show();
             focusView = emailView;
         } else if (!Verification.isPotentialEmail(email)) {
-            Toast.makeText(currentContext, R.string.error_invalid_email, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.error_invalid_email,
+                    Toast.LENGTH_SHORT).show();
             focusView = emailView;
         }
         return focusView;
@@ -99,15 +98,15 @@ public class Model {
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    public void verifyLogin(String email, String password) {
+    public void verifyLogin(String email, String password, Context context) {
         if (userLoginTask != null) {
             return;
         }
 
         // Show a progress spinner, and kick off a background task to
         // perform the user login attempt.
-        ((LoginActivity) currentContext).showProgress(true);
-        userLoginTask = new UserLoginTask(email, password);
+        ((LoginActivity) context).showProgress(true);
+        userLoginTask = new UserLoginTask(email, password, context);
         userLoginTask.execute((Void) null);
     }
 
@@ -119,10 +118,12 @@ public class Model {
 
         private final String email;
         private final String password;
+        private final Context context;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String email, String password, Context context) {
             this.email = email;
             this.password = password;
+            this.context = context;
         }
 
         @Override
@@ -134,7 +135,8 @@ public class Model {
             final AtomicBoolean success = new AtomicBoolean(false);
             final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
             try {
-                firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(
+                        new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
@@ -163,27 +165,29 @@ public class Model {
         @Override
         protected void onPostExecute(final Boolean success) {
             userLoginTask = null;
-            ((LoginActivity) currentContext).showProgress(false);
+            ((LoginActivity) context).showProgress(false);
 
             if (success) {
-                Toast.makeText(currentContext, R.string.login_success, Toast.LENGTH_SHORT).show();
-                Intent myIntent = new Intent(currentContext, MainScreenActivity.class);
-                currentContext.startActivity(myIntent);
+                Toast.makeText(context, R.string.login_success, Toast.LENGTH_SHORT).show();
+                Intent myIntent = new Intent(context, MainScreenActivity.class);
+                context.startActivity(myIntent);
             } else {
-                Toast.makeText(currentContext, R.string.error_incorrect_password, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, R.string.error_incorrect_password,
+                        Toast.LENGTH_LONG).show();
             }
         }
 
         @Override
         protected void onCancelled() {
             userLoginTask = null;
-            ((LoginActivity) currentContext).showProgress(false);
+            ((LoginActivity) context).showProgress(false);
         }
     }
 
     public void populateInventory() {
         Inventory.clear();
-        databaseReference = databaseInstance.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+        databaseReference = databaseInstance.getReference()
+                .child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -210,10 +214,11 @@ public class Model {
         private Long phoneNum;
         private String userType;
         private Location location;
+        private Context context;
 
 
-        UserRegisterTask(String password, String firstName, String lastName, String email, Long phoneNum,
-                         String userType, Location location) {
+        UserRegisterTask(String password, String firstName, String lastName, String email,
+                         Long phoneNum, String userType, Location location, Context context) {
             this.password = password;
             this.firstName = firstName;
             this.lastName = lastName;
@@ -221,6 +226,7 @@ public class Model {
             this.phoneNum = phoneNum;
             this.userType = userType;
             this.location = location;
+            this.context = context;
         }
 
         @Override
@@ -237,8 +243,8 @@ public class Model {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
                                     String userId = firebaseAuth.getCurrentUser().getUid();
-                                    User newUser = createUser(password, firstName, lastName, email, phoneNum, userType,
-                                            location);
+                                    User newUser = createUser(password, firstName, lastName, email,
+                                            phoneNum, userType, location);
                                     saveUserToFirebase(newUser, userType);
                                     success.set(true);
                                     finishedAttempt.set(true);
@@ -264,36 +270,39 @@ public class Model {
         @Override
         protected void onPostExecute(final Boolean taskSuccess) {
             userRegisterTask = null;
-            ((RegistrationActivity) currentContext).showProgress(false);
+            ((RegistrationActivity) context).showProgress(false);
 
             if (taskSuccess) {
-                Toast.makeText(currentContext, R.string.account_creation_success, Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(currentContext, MainScreenActivity.class);
-                currentContext.startActivity(i);
+                Toast.makeText(context, R.string.account_creation_success,
+                        Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(context, MainScreenActivity.class);
+                context.startActivity(i);
             } else {
-                Toast.makeText(currentContext, R.string.error_user_already_exists,
+                Toast.makeText(context, R.string.error_user_already_exists,
                         Toast.LENGTH_LONG).show();
             }
-            Intent i = new Intent(currentContext, LoginActivity.class);
-            currentContext.startActivity(i);
+            Intent i = new Intent(context, LoginActivity.class);
+            context.startActivity(i);
         }
 
         @Override
         protected void onCancelled() {
             userRegisterTask = null;
-            ((RegistrationActivity) currentContext).showProgress(false);
+            ((RegistrationActivity) context).showProgress(false);
         }
     }
 
-    public View getFirstIllegalRegistrationField(EditText emailView, EditText passwordView1, EditText passwordView2,
-                                                 EditText firstNameView, EditText lastNameView, EditText phoneNumView,
-                                                 EditText locationView, EditText managerView, Spinner userTypeSpinner) {
+    public View getFirstIllegalRegistrationField(
+            EditText emailView, EditText passwordView1, EditText passwordView2,
+            EditText firstNameView, EditText lastNameView, EditText phoneNumView,
+            EditText locationView, EditText managerView, Spinner userTypeSpinner, Context context) {
         String email = emailView.getText().toString().trim();
         String password1 = passwordView1.getText().toString().trim();
         String password2 = passwordView2.getText().toString().trim();
         String firstName = firstNameView.getText().toString().trim();
         String lastName = lastNameView.getText().toString().trim();
-        String phoneNumber = Verification.parsePhoneNumber(phoneNumView.getText().toString().trim());
+        String phoneNumber = Verification.parsePhoneNumber(
+                phoneNumView.getText().toString().trim());
         phoneNumber = Verification.removeCommonNameChars(phoneNumber);
         String location = locationView.getText().toString().trim();
         String managerName = managerView.getText().toString().trim();
@@ -303,83 +312,85 @@ public class Model {
         // Manager verification
         // Todo: Add manager verification
         if (userType.equals("Location Employee") && TextUtils.isEmpty(managerName)) {
-            managerView.setError(currentContext.getString(R.string.error_field_required));
+            managerView.setError(context.getString(R.string.error_field_required));
             focusView = managerView;
         }
 
         // Location verification
         // Todo: Add location verification
         if (userType.equals("Location Employee") && TextUtils.isEmpty(location)) {
-            locationView.setError(currentContext.getString(R.string.error_field_required));
+            locationView.setError(context.getString(R.string.error_field_required));
             focusView = locationView;
         }
 
         // Password verification
         if (!(password1.equals(password2))) {
-            passwordView2.setError(currentContext.getString(R.string.error_password_must_match));
+            passwordView2.setError(context.getString(R.string.error_password_must_match));
             focusView = passwordView2;
         } else if (TextUtils.isEmpty(password2)) {
-            passwordView2.setError(currentContext.getString(R.string.error_field_required));
+            passwordView2.setError(context.getString(R.string.error_field_required));
             focusView = passwordView2;
         }
         if (TextUtils.isEmpty(password1)) {
-            passwordView1.setError(currentContext.getString(R.string.error_field_required));
+            passwordView1.setError(context.getString(R.string.error_field_required));
             focusView = passwordView1;
         } else if (!(Verification.isStrongPassword(password1))) {
-            passwordView1.setError(currentContext.getString(R.string.error_password_strength));
+            passwordView1.setError(context.getString(R.string.error_password_strength));
             focusView = passwordView1;
         }
 
         // Phone number verification
         if (TextUtils.isEmpty(phoneNumber)) {
-            phoneNumView.setError(currentContext.getString(R.string.error_field_required));
+            phoneNumView.setError(context.getString(R.string.error_field_required));
             focusView = phoneNumView;
         } else {
             if (!(Verification.isPhoneValid(phoneNumber))) {
-                phoneNumView.setError(currentContext.getString(R.string.error_invalid_phone_number));
+                phoneNumView.setError(context.getString(
+                        R.string.error_invalid_phone_number));
                 focusView = phoneNumView;
             }
         }
 
         // Email verification
         if (TextUtils.isEmpty(email)) {
-            emailView.setError(currentContext.getString(R.string.error_field_required));
+            emailView.setError(context.getString(R.string.error_field_required));
             focusView = emailView;
         } else if (!(Verification.isPotentialEmail(email))) {
-            emailView.setError(currentContext.getString(R.string.error_invalid_email));
+            emailView.setError(context.getString(R.string.error_invalid_email));
             focusView = emailView;
         }
 
         // Last name verification
         if (TextUtils.isEmpty(lastName)) {
-            lastNameView.setError(currentContext.getString(R.string.error_field_required));
+            lastNameView.setError(context.getString(R.string.error_field_required));
             focusView = lastNameView;
         } else if (!(Verification.isNameLegal(lastName))) {
-            lastNameView.setError(currentContext.getString(R.string.error_invalid_name));
+            lastNameView.setError(context.getString(R.string.error_invalid_name));
             focusView = lastNameView;
         }
 
         // Last name verification
         if (TextUtils.isEmpty(firstName)) {
-            firstNameView.setError(currentContext.getString(R.string.error_field_required));
+            firstNameView.setError(context.getString(R.string.error_field_required));
             focusView = firstNameView;
         } else if (!(Verification.isNameLegal(firstName))) {
-            firstNameView.setError(currentContext.getString(R.string.error_invalid_name));
+            firstNameView.setError(context.getString(R.string.error_invalid_name));
             focusView = firstNameView;
         }
         return focusView;
     }
 
-    public void addNewUser(String password, String firstName, String lastName, String email, Long phoneNum,
-                      String userType, Location location) {
+    public void addNewUser(String password, String firstName, String lastName, String email,
+                           Long phoneNum, String userType, Location location, Context context) {
         if (userRegisterTask != null) {
             return;
         }
 
         // Show a progress spinner and kick off a background task to
         // perform the user registration attempt
-        ((RegistrationActivity) currentContext).showProgress(true);
-        userRegisterTask = new UserRegisterTask(password, firstName, lastName, email, phoneNum, userType, location);
+        ((RegistrationActivity) context).showProgress(true);
+        userRegisterTask = new UserRegisterTask(password, firstName, lastName, email, phoneNum,
+                userType, location, context);
         userRegisterTask.execute((Void) null);
     }
 
@@ -417,8 +428,8 @@ public class Model {
         return inventory;
     }
 
-    public void updateLocations() {
-        InputStream locationsInfo = currentContext.getResources().openRawResource(R.raw.locations);
+    public void updateLocations(Context context) {
+        InputStream locationsInfo = context.getResources().openRawResource(R.raw.locations);
         CSVReader.parseCSV(locationsInfo);
         locations = LocationManager.getLocations();
     }
@@ -427,7 +438,7 @@ public class Model {
         return locations;
     }
 
-    public void searchByKeyword(String searchKeywords, String location) {
+    public void searchByKeyword(String searchKeywords, String location, Context context) {
         String[] keywords = searchKeywords.split("\\s+");
         String[] itemDescriptionWords;
         List<Item> filteredItems = new ArrayList<>();
@@ -461,10 +472,10 @@ public class Model {
                 }
             }
         }
-        displayResults(filteredItems);
+        displayResults(filteredItems, context);
     }
 
-    public void searchByCategory(ItemCategory category, String location) {
+    public void searchByCategory(ItemCategory category, String location, Context context) {
         List<Item> filteredItems = new ArrayList<>();
 
         if (location.equals("Search all locations")) {
@@ -487,7 +498,7 @@ public class Model {
                 }
             }
         }
-        displayResults(filteredItems);
+        displayResults(filteredItems, context);
     }
 
     public String[] getDescriptionKeywords(Item item) {
@@ -507,17 +518,18 @@ public class Model {
         return null;
     }
 
-    private void displayResults(List<Item> items) {
+    private void displayResults(List<Item> items, Context context) {
         if (items.size() == 0) {
-            Toast.makeText(currentContext, R.string.search_no_matches, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.search_no_matches, Toast.LENGTH_LONG).show();
         } else {
             Inventory.setFilteredInventory(items);
-            Intent i = new Intent(currentContext, SearchListActivity.class);
-            currentContext.startActivity(i);
+            Intent i = new Intent(context, SearchListActivity.class);
+            context.startActivity(i);
         }
     }
 
-    public View getFirstIllegalItemField(EditText shortDescView, EditText longDescView, EditText valueView) {
+    public View getFirstIllegalItemField(EditText shortDescView, EditText longDescView,
+                                         EditText valueView, Context context) {
 
         String shortDesc = shortDescView.getText().toString().trim();
         String longDesc = longDescView.getText().toString().trim();
@@ -525,31 +537,31 @@ public class Model {
         View focusView = null;
         // Value verification
         if (TextUtils.isEmpty(value)) {
-            valueView.setError(currentContext.getString(R.string.error_field_required));
+            valueView.setError(context.getString(R.string.error_field_required));
             focusView = valueView;
         } else {
             int i;
             try {
                 i = Integer.parseInt(value);
                 if (i < 0) {
-                    valueView.setError(currentContext.getString(R.string.error_invalid_cost));
+                    valueView.setError(context.getString(R.string.error_invalid_cost));
                     focusView = valueView;
                 }
             } catch (NumberFormatException e) {
-                valueView.setError(currentContext.getString(R.string.error_invalid_cost));
+                valueView.setError(context.getString(R.string.error_invalid_cost));
                 focusView = valueView;
             }
         }
 
         // Long description verification
         if (TextUtils.isEmpty(longDesc)) {
-            longDescView.setError(currentContext.getString(R.string.error_field_required));
+            longDescView.setError(context.getString(R.string.error_field_required));
             focusView = longDescView;
         }
 
         // Short description verification
         if (TextUtils.isEmpty(shortDesc)) {
-            shortDescView.setError(currentContext.getString(R.string.error_field_required));
+            shortDescView.setError(context.getString(R.string.error_field_required));
             focusView = shortDescView;
         }
         return focusView;
@@ -571,12 +583,14 @@ public class Model {
     }
 
     private void saveItemToFirebase(Item item) {
-        databaseReference = databaseInstance.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+        databaseReference = databaseInstance.getReference()
+                .child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
         databaseReference.push().setValue(item);
     }
 
     private void getInitialItemId() {
-        databaseReference = databaseInstance.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
+        databaseReference = databaseInstance.getReference()
+                .child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -592,7 +606,8 @@ public class Model {
     }
 
     private void saveIDToFirebase(int id) {
-        databaseReference = databaseInstance.getReference().child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
+        databaseReference = databaseInstance.getReference()
+                .child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
         databaseReference.setValue(id);
     }
 

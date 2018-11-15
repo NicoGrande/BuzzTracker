@@ -17,7 +17,7 @@
             android:id="@+id/location_list_back"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Return to Main Screen" />
+            android:text="@string/locations_return_text" />
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"

@@ -84,7 +84,6 @@ public class ItemListActivity extends AppCompatActivity {
         });
 
         model = Model.getInstance();
-        model.updateContext(this);
 
         View recyclerView = findViewById(R.id.item_list);
         assert recyclerView != null;
@@ -92,7 +91,8 @@ public class ItemListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, model.getInventory(), mTwoPane));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(
+                this, model.getInventory(), mTwoPane));
     }
 
     /**

@@ -6,7 +6,8 @@ public class LocationEmployee extends User {
 
     public LocationEmployee() {}
 
-    public LocationEmployee(String pw, String fName, String lName, String email, Long phoneNum, Location loc) {
+    public LocationEmployee(String pw, String fName, String lName, String email, Long phoneNum,
+                            Location loc) {
         super(pw, fName, lName, email, phoneNum);
         location = loc;
     }

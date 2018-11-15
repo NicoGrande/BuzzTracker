@@ -74,7 +74,6 @@ public class LocationListActivity extends AppCompatActivity {
         }
 
         model = Model.getInstance();
-        model.updateContext(this);
 
         View recyclerView = findViewById(R.id.location_list);
         assert recyclerView != null;
@@ -82,7 +81,8 @@ public class LocationListActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, model.getLocations(), mTwoPane));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(
+                this, model.getLocations(), mTwoPane));
     }
 
     /**

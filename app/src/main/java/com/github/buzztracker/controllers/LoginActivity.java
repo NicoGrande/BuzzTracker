@@ -98,8 +98,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         progressView = findViewById(R.id.login_progress);
 
         model = Model.getInstance();
-        model.updateContext(this);
-        model.updateLocations();
+        model.updateLocations(this);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -115,13 +114,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void attemptLogin() {
         View focusView;
-        focusView = model.getFirstIllegalLoginField(mEmailView, mPasswordView);
+        focusView = model.getFirstIllegalLoginField(mEmailView, mPasswordView, this);
         if (focusView != null) {
             focusView.requestFocus();
         } else {
             String email = mEmailView.getText().toString();
             String password = mPasswordView.getText().toString();
-            model.verifyLogin(email, password);
+            model.verifyLogin(email, password, this);
         }
     }
 
@@ -141,9 +140,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
     private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
         if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }

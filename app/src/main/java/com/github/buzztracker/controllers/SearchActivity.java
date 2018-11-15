@@ -36,7 +36,6 @@ public class SearchActivity extends AppCompatActivity {
         categorySpinner = findViewById(R.id.search_category_spinner);
 
         model = Model.getInstance();
-        model.updateContext(this);
 
         // Populate a list of the possible item categories along with an "All categories" option
         List<String> adapterCategories = new ArrayList<>();
@@ -93,12 +92,12 @@ public class SearchActivity extends AppCompatActivity {
     private void searchByKeyword() {
         String searchKeywords = searchTextView.getText().toString().trim();
         String location = locationSpinner.getSelectedItem().toString();
-        model.searchByKeyword(searchKeywords, location);
+        model.searchByKeyword(searchKeywords, location, this);
     }
 
     private void searchByCategory() {
         ItemCategory category = model.getCategory(categorySpinner.getSelectedItem().toString());
         String location = locationSpinner.getSelectedItem().toString();
-        model.searchByCategory(category, location);
+        model.searchByCategory(category, location, this);
     }
 }

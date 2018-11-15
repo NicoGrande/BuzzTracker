@@ -20,14 +20,19 @@ public class CSVReader {
      */
     static void parseCSV(InputStream input) {
         try {
-            BufferedReader data = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+            BufferedReader data = new BufferedReader(new InputStreamReader(input,
+                    StandardCharsets.UTF_8));
 
             String line;
             data.readLine(); //get rid of header line
+            line = data.readLine();;
             LocationManager.clearLocations();
-            while ((line = data.readLine()) != null) {
+            while (line != null) {
                 String[] tokens = line.split(",");
-                LocationManager.addLocation(new Location(tokens[0], tokens[1], tokens[8], tokens[2], tokens[3], tokens[4], tokens[5], tokens[6], tokens[7], tokens[9], tokens[10]));
+                LocationManager.addLocation(new Location(tokens[0], tokens[1], tokens[8],
+                        tokens[2], tokens[3], tokens[4], tokens[5], tokens[6], tokens[7],
+                        tokens[9], tokens[10]));
+                line = data.readLine();
             }
             data.close();
         } catch (IOException e) {

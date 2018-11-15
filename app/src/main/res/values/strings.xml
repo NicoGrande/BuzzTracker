@@ -84,5 +84,12 @@
     <string name="account_creation_success">Account successfully created</string>
     <string name="login_success">Successfully logged in</string>
     <string name="search_no_matches">No items match search criteria</string>
-    <string name="title_activity_test_maps">Map</string>
+    <string name="locations_return_text">Return to Main Screen</string>
+    <string name="buzztracker">BuzzTracker</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="login">Login</string>
+    <string name="locations">Locations</string>
+    <string name="inventory">Inventory</string>
+    <string name="map">Map</string>
 </resources>
