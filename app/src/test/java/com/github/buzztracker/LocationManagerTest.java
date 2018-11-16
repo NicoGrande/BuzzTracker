@@ -73,7 +73,6 @@ public class LocationManagerTest {
         expectedCoords.add(new LatLng(33.71747, -84.2521)); // LatLng for location 5
         expectedCoords.add(new LatLng(33.96921, -84.3688)); // LatLng for location 6
 
-        // Call the method and store the returned results in another List. This is the actual result
         List<LatLng> actualLocCoords = locationManager.getLocationCoords();
 
         // To verify the correctness, iterate through the lists together
@@ -82,6 +81,8 @@ public class LocationManagerTest {
             assertEquals("Coordinates of all Locations not properly received", expectedCoords.get(i), actualLocCoords.get(i));
         }
         locationManager.clearLocations();
+        actualLocCoords = locationManager.getLocationCoords();
+        assertNull("Did not return null on empty location list", actualLocCoords);
     }
 
     /**

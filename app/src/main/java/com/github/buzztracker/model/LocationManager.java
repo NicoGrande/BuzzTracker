@@ -46,6 +46,9 @@ public class LocationManager {
      * @return list of all locations as strings; null if empty
      */
     public List<String> getLocationNames() {
+        if (locations.isEmpty()) {
+            return null;
+        }
         List<String> locationNames = new ArrayList<>();
         for (Location l : locations) {
             locationNames.add(l.getLocationName());
@@ -75,6 +78,9 @@ public class LocationManager {
      * @return list of all location coordinates; null if empty
      */
     public List<LatLng> getLocationCoords() {
+        if (locations.isEmpty()) {
+            return null;
+        }
         List<LatLng> locationCoords = new ArrayList<>();
         for (Location location : locations) {
             locationCoords.add(new LatLng(Double.parseDouble(location.getLatitude()),
