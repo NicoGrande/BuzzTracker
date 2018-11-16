@@ -2,9 +2,9 @@ package com.github.buzztracker.model;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -13,16 +13,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.github.buzztracker.FirebaseConstants;
 import com.github.buzztracker.R;
-import com.github.buzztracker.controllers.LoginActivity;
-import com.github.buzztracker.controllers.MainScreenActivity;
-import com.github.buzztracker.controllers.RegistrationActivity;
 import com.github.buzztracker.controllers.SearchListActivity;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,26 +24,41 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class Model {
+import static com.github.buzztracker.model.Constants.*;
 
-    private final static Model instance = new Model();
+/**
+ * Singleton instance that basically does everything
+ */
+public final class Model {
+
+    private static final Model instance = new Model();
+
+    /**
+     * Provides a means of acquiring the singleton in other classes
+     *
+     * @return an instance of Model
+     */
     public static Model getInstance() {
         return instance;
     }
 
-    private UserLoginTask userLoginTask;
-    private UserRegisterTask userRegisterTask;
-    private FirebaseAuth firebaseAuth;
     private FirebaseDatabase databaseInstance;
     private DatabaseReference databaseReference;
     private List<Item> inventory;
+    private final LocationManager locationManager;
     private List<Location> locations;
+    private final Login loginAttempt;
+    private static AtomicInteger loginComplete;
+    private static AtomicInteger registerComplete;
 
     private Model() {
-
+        locationManager = LocationManager.getInstance();
+        Model.initializeCompletes();
+        loginAttempt = new Login();
         initializeModel();
         updateInventory();
     }
@@ -60,141 +68,57 @@ public class Model {
         try {
             databaseInstance = FirebaseDatabase.getInstance();
             databaseReference = databaseInstance.getReference();
-            firebaseAuth = FirebaseAuth.getInstance();
 
             getInitialItemId();
             populateInventory();
-        } catch (ExceptionInInitializerError error) {
-            Log.e("Model initialization", error.getMessage());
-        }
+        } catch (ExceptionInInitializerError ignored) {}
     }
 
-    public View getFirstIllegalLoginField(AutoCompleteTextView emailView, EditText passwordView, Context context) {
-        String email = emailView.getText().toString();
-        String password = passwordView.getText().toString();
-        View focusView = null;
-
-        if (TextUtils.isEmpty(password)) {
-            Toast.makeText(context, R.string.error_field_required,
-                    Toast.LENGTH_SHORT).show();
-            focusView = passwordView;
-        }
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(context, R.string.error_field_required,
-                    Toast.LENGTH_SHORT).show();
-            focusView = emailView;
-        } else if (!Verification.isPotentialEmail(email)) {
-            Toast.makeText(context, R.string.error_invalid_email,
-                    Toast.LENGTH_SHORT).show();
-            focusView = emailView;
-        }
-        return focusView;
+    private static void initializeCompletes() {
+        loginComplete = new AtomicInteger(NOT_STARTED);
+        registerComplete = new AtomicInteger(NOT_STARTED);
     }
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
+     * Determines if a View holds valid information for logging in
+     *
+     * @param emailView View containing email information
+     * @param passwordView View containing password information
+     * @param context application context
+     * @return the topmost invalid View if there is an issue; null otherwise
+     */
+    public View getFirstIllegalLoginField(AutoCompleteTextView emailView,
+                                          EditText passwordView, Context context) {
+        return loginAttempt.getFirstIllegalLoginField(emailView, passwordView, context);
+    }
+
+    /**
+     * Attempts to login with Firebase with given login info
+     *
+     * @param email email address
+     * @param password password associated with email
+     * @param context application context
      */
     public void verifyLogin(String email, String password, Context context) {
-        if (userLoginTask != null) {
+        if (loginComplete.get() != NOT_STARTED) {
             return;
         }
+        setLoginComplete(IN_PROGRESS);
 
-        // Show a progress spinner, and kick off a background task to
-        // perform the user login attempt.
-        ((LoginActivity) context).showProgress(true);
-        userLoginTask = new UserLoginTask(email, password, context);
-        userLoginTask.execute((Void) null);
+        loginAttempt.verifyLogin(email, password, context);
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String email;
-        private final String password;
-        private final Context context;
-
-        UserLoginTask(String email, String password, Context context) {
-            this.email = email;
-            this.password = password;
-            this.context = context;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: add alternative network logins
-
-            // keeps track of Firebase authentication success
-            // is kinda weird but AtomicBoolean allows it to be modified from with lambda function
-            final AtomicBoolean success = new AtomicBoolean(false);
-            final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
-            try {
-                firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(
-                        new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            success.set(true);
-                            finishedAttempt.set(true);
-                        } else {
-                            finishedAttempt.set(true);
-                        }
-                    }
-                });
-
-                // waits 10 seconds to try to login with FirebaseAuth, fails if unable
-                for (int i = 0; i < 10; i++) {
-                    if (finishedAttempt.get()) {
-                        return success.get();
-                    }
-                    Thread.sleep(1000);
-                }
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            return success.get();
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            userLoginTask = null;
-            ((LoginActivity) context).showProgress(false);
-
-            if (success) {
-                Toast.makeText(context, R.string.login_success, Toast.LENGTH_SHORT).show();
-                Intent myIntent = new Intent(context, MainScreenActivity.class);
-                context.startActivity(myIntent);
-            } else {
-                Toast.makeText(context, R.string.error_incorrect_password,
-                        Toast.LENGTH_LONG).show();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            userLoginTask = null;
-            ((LoginActivity) context).showProgress(false);
-        }
-    }
-
-    public void populateInventory() {
+    private void populateInventory() {
         Inventory.clear();
-        databaseReference = databaseInstance.getReference()
-                .child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+        databaseReference = databaseInstance.getReference();
+        databaseReference = databaseReference.child(Constants.FIREBASE_CHILD_ITEMS);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     Item item = postSnapshot.getValue(Item.class);
                     Inventory.addToInventory(item);
-                    Log.d("Item loaded in: ", item != null ? item.getShortDesc() : null);
+                    Log.d("Item loaded in: ", (item != null) ? item.getShortDesc() : null);
                 }
             }
 
@@ -205,120 +129,74 @@ public class Model {
         });
     }
 
-    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
-
-        private String password;
-        private String firstName;
-        private String lastName;
-        private String email;
-        private Long phoneNum;
-        private String userType;
-        private Location location;
-        private Context context;
-
-
-        UserRegisterTask(String password, String firstName, String lastName, String email,
-                         Long phoneNum, String userType, Location location, Context context) {
-            this.password = password;
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.email = email;
-            this.phoneNum = phoneNum;
-            this.userType = userType;
-            this.location = location;
-            this.context = context;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            // keeps track of registration progress
-            final AtomicBoolean success = new AtomicBoolean(false);
-            final AtomicBoolean finishedAttempt = new AtomicBoolean(false);
-
-            try {
-                firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(
-                        new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    String userId = firebaseAuth.getCurrentUser().getUid();
-                                    User newUser = createUser(password, firstName, lastName, email,
-                                            phoneNum, userType, location);
-                                    saveUserToFirebase(newUser, userType);
-                                    success.set(true);
-                                    finishedAttempt.set(true);
-                                } else {
-                                    finishedAttempt.set(true);
-                                }
-                            }
-                        });
-                // waits 10 seconds to try to register with FirebaseAuth, fails if unable
-                for (int i = 0; i < 10; i++) {
-                    if (finishedAttempt.get()) {
-                        return success.get();
-                    }
-                    Thread.sleep(1000);
-                }
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            return success.get();
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean taskSuccess) {
-            userRegisterTask = null;
-            ((RegistrationActivity) context).showProgress(false);
-
-            if (taskSuccess) {
-                Toast.makeText(context, R.string.account_creation_success,
-                        Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(context, MainScreenActivity.class);
-                context.startActivity(i);
-            } else {
-                Toast.makeText(context, R.string.error_user_already_exists,
-                        Toast.LENGTH_LONG).show();
-            }
-            Intent i = new Intent(context, LoginActivity.class);
-            context.startActivity(i);
-        }
-
-        @Override
-        protected void onCancelled() {
-            userRegisterTask = null;
-            ((RegistrationActivity) context).showProgress(false);
-        }
-    }
-
+    /**
+     * Determines if any user registration fields are invalid
+     *
+     * @param emailView View containing email
+     * @param passwordView1 View containing password
+     * @param passwordView2 View containing the password re-entered
+     * @param firstNameView View containing the first name
+     * @param lastNameView View containing the last name
+     * @param phoneNumView View containing the phone number
+     * @param locationView View containing the location (optional)
+     * @param managerView View containing the manager (optional)
+     * @param userTypeSpinner View containing the type of user
+     * @param context application context
+     * @return the topmost View that has an error if there is one; null otherwise
+     */
     public View getFirstIllegalRegistrationField(
             EditText emailView, EditText passwordView1, EditText passwordView2,
             EditText firstNameView, EditText lastNameView, EditText phoneNumView,
             EditText locationView, EditText managerView, Spinner userTypeSpinner, Context context) {
-        String email = emailView.getText().toString().trim();
-        String password1 = passwordView1.getText().toString().trim();
-        String password2 = passwordView2.getText().toString().trim();
-        String firstName = firstNameView.getText().toString().trim();
-        String lastName = lastNameView.getText().toString().trim();
-        String phoneNumber = Verification.parsePhoneNumber(
-                phoneNumView.getText().toString().trim());
+
+        Editable viewText = emailView.getText();
+        String email = viewText.toString();
+        email = email.trim();
+
+        viewText = passwordView1.getText();
+        String password1 = viewText.toString();
+        password1 = password1.trim();
+
+        viewText = passwordView2.getText();
+        String password2 = viewText.toString();
+        password2 = password2.trim();
+
+        viewText = firstNameView.getText();
+        String firstName = viewText.toString();
+        firstName = firstName.trim();
+
+        viewText = lastNameView.getText();
+        String lastName = viewText.toString();
+        lastName = lastName.trim();
+
+        viewText = phoneNumView.getText();
+        String phoneNumber = viewText.toString();
+        phoneNumber = phoneNumber.trim();
+        phoneNumber = Verification.parsePhoneNumber(phoneNumber);
         phoneNumber = Verification.removeCommonNameChars(phoneNumber);
-        String location = locationView.getText().toString().trim();
-        String managerName = managerView.getText().toString().trim();
-        String userType = userTypeSpinner.getSelectedItem().toString().trim();
+
+        viewText = locationView.getText();
+        String location = viewText.toString();
+        location = location.trim();
+
+        viewText = managerView.getText();
+        String managerName = viewText.toString();
+        managerName = managerName.trim();
+
+        Object spinnerSelectedItem = userTypeSpinner.getSelectedItem();
+        String userType = spinnerSelectedItem.toString();
+        userType = userType.trim();
+
         View focusView = null;
 
         // Manager verification
-        // Todo: Add manager verification
-        if (userType.equals("Location Employee") && TextUtils.isEmpty(managerName)) {
+        if ("Location Employee".equals(userType) && TextUtils.isEmpty(managerName)) {
             managerView.setError(context.getString(R.string.error_field_required));
             focusView = managerView;
         }
 
         // Location verification
-        // Todo: Add location verification
-        if (userType.equals("Location Employee") && TextUtils.isEmpty(location)) {
+        if ("Location Employee".equals(userType) && TextUtils.isEmpty(location)) {
             locationView.setError(context.getString(R.string.error_field_required));
             focusView = locationView;
         }
@@ -343,12 +221,10 @@ public class Model {
         if (TextUtils.isEmpty(phoneNumber)) {
             phoneNumView.setError(context.getString(R.string.error_field_required));
             focusView = phoneNumView;
-        } else {
-            if (!(Verification.isPhoneValid(phoneNumber))) {
+        } else if (!(Verification.isPhoneValid(phoneNumber))) {
                 phoneNumView.setError(context.getString(
                         R.string.error_invalid_phone_number));
                 focusView = phoneNumView;
-            }
         }
 
         // Email verification
@@ -380,30 +256,55 @@ public class Model {
         return focusView;
     }
 
+    /**
+     * Attempts to register new user with Firebase
+     *
+     * @param password password
+     * @param firstName first name
+     * @param lastName last name
+     * @param email email address
+     * @param phoneNum phone number
+     * @param userType type of user
+     * @param location location
+     * @param context application context
+     */
     public void addNewUser(String password, String firstName, String lastName, String email,
                            Long phoneNum, String userType, Location location, Context context) {
-        if (userRegisterTask != null) {
+        if (registerComplete.get() != NOT_STARTED) {
             return;
         }
+        setRegisterComplete(IN_PROGRESS);
 
         // Show a progress spinner and kick off a background task to
         // perform the user registration attempt
-        ((RegistrationActivity) context).showProgress(true);
-        userRegisterTask = new UserRegisterTask(password, firstName, lastName, email, phoneNum,
-                userType, location, context);
+        User newUser = createUser(password, firstName, lastName, email,
+                phoneNum, userType, location);
+        UserRegisterTask userRegisterTask = new UserRegisterTask(newUser, userType, context);
         userRegisterTask.execute((Void) null);
     }
 
+    /**
+     * Creates an instance of User
+     *
+     * @param pw password
+     * @param fName first name
+     * @param lName last name
+     * @param email email address
+     * @param phoneNum phone number
+     * @param userType type of user to be created
+     * @param loc location
+     * @return the created user
+     */
     public User createUser(String pw, String fName, String lName, String email, Long phoneNum,
                             String userType, Location loc) {
         User newUser;
-        if (userType.equals("User")) {
+        if ("User".equals(userType)) {
             newUser = new User(pw, fName, lName, email, phoneNum);
-        } else if (userType.equals("Location Employee")) {
+        } else if ("Location Employee".equals(userType)) {
             newUser = new LocationEmployee(pw, fName, lName, email, phoneNum, loc);
-        } else if (userType.equals("Admin")) {
+        } else if ("Admin".equals(userType)) {
             newUser = new Admin(pw, fName, lName, email, phoneNum);
-        } else if (userType.equals("Manager")){
+        } else if ("Manager".equals(userType)){
             newUser = new Manager(pw, fName, lName, email, phoneNum);
         } else {
             throw new IllegalArgumentException("Invalid user type");
@@ -412,44 +313,60 @@ public class Model {
         return newUser;
     }
 
-    private void saveUserToFirebase(User user, String userType) {
-        databaseReference = databaseInstance
-                .getReference()
-                .child(FirebaseConstants.FIREBASE_CHILD_USERS)
-                .child(userType);
-        databaseReference.push().setValue(user);
-    }
-
-    public void updateInventory() {
+    private void updateInventory() {
         inventory = Inventory.getInventory();
     }
 
+    /**
+     * Provides means for classes to get the list of inventory items
+     *
+     * @return list of items in inventory
+     */
     public List<Item> getInventory() {
-        return inventory;
+        return Collections.unmodifiableList(inventory);
     }
 
+    /**
+     * Reads in locations from CSV and adds them to location list
+     *
+     * @param context application context
+     */
     public void updateLocations(Context context) {
-        InputStream locationsInfo = context.getResources().openRawResource(R.raw.locations);
-        CSVReader.parseCSV(locationsInfo);
-        locations = LocationManager.getLocations();
+        Resources resources = context.getResources();
+        InputStream locationsInfo = resources.openRawResource(R.raw.locations);
+        CSVReader.parseCSV(locationsInfo, locationManager);
+        locations = locationManager.getLocations();
     }
 
+    /**
+     * Provides means for classes to get the list of locations
+     *
+     * @return a list containing all the locations
+     */
     public List<Location> getLocations() {
-        return locations;
+        return Collections.unmodifiableList(locations);
     }
 
+    /**
+     * Searches inventory by keyword and generates a filtered list of items
+     * that match the search criteria
+     *
+     * @param searchKeywords keywords being used for the search
+     * @param location the location at which to search for the items
+     * @param context application context
+     */
     public void searchByKeyword(String searchKeywords, String location, Context context) {
         String[] keywords = searchKeywords.split("\\s+");
         String[] itemDescriptionWords;
         List<Item> filteredItems = new ArrayList<>();
 
-        if (location.equals("Search all locations")) {
+        if ("Search all locations".equals(location)) {
             for (Item item : inventory) {
                 itemDescriptionWords = getDescriptionKeywords(item);
                 outerLoop:
-                for (int i = 0; i < keywords.length; i++) {
-                    for (int j = 0; j < itemDescriptionWords.length; j++) {
-                        if (keywords[i].equals(itemDescriptionWords[j])) {
+                for (String keyword : keywords) {
+                    for (String itemDescriptionWord : itemDescriptionWords) {
+                        if (keyword.equals(itemDescriptionWord)) {
                             filteredItems.add(item);
                             break outerLoop;
                         }
@@ -458,12 +375,14 @@ public class Model {
             }
         } else {
             for (Item item : inventory) {
-                if (item.getLocation().getLocationName().equals(location)) {
+                Location itemLocation = item.getLocation();
+                String itemLocationName = itemLocation.getLocationName();
+                if (itemLocationName.equals(location)) {
                     itemDescriptionWords = getDescriptionKeywords(item);
                     outerLoop:
-                    for (int i = 0; i < keywords.length; i++) {
-                        for (int j = 0; j < itemDescriptionWords.length; j++) {
-                            if (keywords[i].equals(itemDescriptionWords[j])) {
+                    for (String keyword : keywords) {
+                        for (String itemDescriptionWord : itemDescriptionWords) {
+                            if (keyword.equals(itemDescriptionWord)) {
                                 filteredItems.add(item);
                                 break outerLoop;
                             }
@@ -475,10 +394,18 @@ public class Model {
         displayResults(filteredItems, context);
     }
 
+    /**
+     * Searches inventory by category and generates a filtered list of items
+     * that match the search criteria
+     *
+     * @param category the category of items to search for
+     * @param location the location at which to search for the items
+     * @param context application context
+     */
     public void searchByCategory(ItemCategory category, String location, Context context) {
         List<Item> filteredItems = new ArrayList<>();
 
-        if (location.equals("Search all locations")) {
+        if ("Search all locations".equals(location)) {
             for (Item item : inventory) {
                 // if searching all categories
                 if (category == null) {
@@ -487,9 +414,12 @@ public class Model {
                     filteredItems.add(item);
                 }
             }
+
         } else {
             for (Item item : inventory) {
-                if (item.getLocation().getLocationName().equals(location)) {
+                Location itemLocation = item.getLocation();
+                String itemLocationName = itemLocation.getLocationName();
+                if (itemLocationName.equals(location)) {
                     if (category == null) {
                         filteredItems.add(item);
                     } else if (item.getCategory() == category) {
@@ -501,26 +431,34 @@ public class Model {
         displayResults(filteredItems, context);
     }
 
-    public String[] getDescriptionKeywords(Item item) {
+    private String[] getDescriptionKeywords(Item item) {
         String description = item.getFullDesc() + " " + item.getShortDesc();
         return description.split("\\s+");
     }
 
+    /**
+     * Gets the ItemCategory for a String of matching name
+     *
+     * @param cat the String matching the desired ItemCategory name
+     * @return the ItemCategory that has a name matching cat
+     */
     public ItemCategory getCategory(String cat) {
-        if (cat.equals("Search all categories")) {
+        if ("Search all categories".equals(cat)) {
             return null;
         }
-        for (ItemCategory ic : ItemCategory.values()) {
-            if (ic.getAsString().equals(cat)) {
-                return ic;
+        for (ItemCategory itemCategory : ItemCategory.values()) {
+            String categoryString = itemCategory.getAsString();
+            if (categoryString.equals(cat)) {
+                return itemCategory;
             }
         }
         return null;
     }
 
     private void displayResults(List<Item> items, Context context) {
-        if (items.size() == 0) {
-            Toast.makeText(context, R.string.search_no_matches, Toast.LENGTH_LONG).show();
+        if (items.isEmpty()) {
+            Toast toast = Toast.makeText(context, R.string.search_no_matches, Toast.LENGTH_LONG);
+            toast.show();
         } else {
             Inventory.setFilteredInventory(items);
             Intent i = new Intent(context, SearchListActivity.class);
@@ -528,12 +466,29 @@ public class Model {
         }
     }
 
+    /** Determines if the Item registration fields have invalid information
+     *
+     * @param shortDescView View containing a short description of the item
+     * @param longDescView View containing a long description of the item
+     * @param valueView View containing the value of the item
+     * @param context application context
+     * @return the topmost View that has an invalid field if there is one; null otherwise
+     */
     public View getFirstIllegalItemField(EditText shortDescView, EditText longDescView,
                                          EditText valueView, Context context) {
 
-        String shortDesc = shortDescView.getText().toString().trim();
-        String longDesc = longDescView.getText().toString().trim();
-        String value = valueView.getText().toString().trim();
+        Editable viewText = shortDescView.getText();
+        String shortDesc = viewText.toString();
+        shortDesc = shortDesc.trim();
+
+        viewText = longDescView.getText();
+        String longDesc = viewText.toString();
+        longDesc = longDesc.trim();
+
+        viewText = valueView.getText();
+        String value = viewText.toString();
+        value = value.trim();
+
         View focusView = null;
         // Value verification
         if (TextUtils.isEmpty(value)) {
@@ -567,9 +522,19 @@ public class Model {
         return focusView;
     }
 
+    /**
+     * Adds a new item to the inventory
+     *
+     * @param shortDesc short description
+     * @param longDesc long description
+     * @param value cost in dollars
+     * @param comment optional comment
+     * @param location location
+     * @param category category
+     */
     public void addNewItem(String shortDesc, String longDesc, int value, String comment,
                            String location, ItemCategory category) {
-        Location loc = LocationManager.getLocationFromName(location);
+        Location loc = locationManager.getLocationFromName(location);
         Item item;
         if (comment.isEmpty()) {
             item = new Item(loc, shortDesc, longDesc, value, category);
@@ -584,17 +549,17 @@ public class Model {
 
     private void saveItemToFirebase(Item item) {
         databaseReference = databaseInstance.getReference()
-                .child(FirebaseConstants.FIREBASE_CHILD_ITEMS);
+                .child(Constants.FIREBASE_CHILD_ITEMS);
         databaseReference.push().setValue(item);
     }
 
     private void getInitialItemId() {
         databaseReference = databaseInstance.getReference()
-                .child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
+                .child(Constants.FIREBASE_CHILD_ITEM_COUNTER);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Item.idCounter = (int) ((long) dataSnapshot.getValue());
+                Item.setIdCounter((int) ((long) dataSnapshot.getValue()));
                 Log.d("Last item ID loaded: ", "" + dataSnapshot.getValue());
             }
 
@@ -607,11 +572,67 @@ public class Model {
 
     private void saveIDToFirebase(int id) {
         databaseReference = databaseInstance.getReference()
-                .child(FirebaseConstants.FIREBASE_CHILD_ITEM_COUNTER);
+                .child(Constants.FIREBASE_CHILD_ITEM_COUNTER);
         databaseReference.setValue(id);
     }
 
+    /**
+     * Public getter for the filtered list created by searching
+     *
+     * @return a list containing the filtered search items matching the most recent search
+     */
     public List<Item> getFilteredInventory() {
         return Inventory.getFilteredInventory();
+    }
+
+    /**
+     * Getter for a list of the location coordinates for the map
+     *
+     * @return a list containing the LatLng coordinates of each location
+     */
+    public List<LatLng> getLocationCoords() {
+        return locationManager.getLocationCoords();
+    }
+
+    /**
+     * Getter for all ItemCategories as strings
+     *
+     * @return list of all ItemCategories as strings
+     */
+    public List<String> getItemCategoryValuesAsString() {
+        ItemCategory[] categories = ItemCategory.values();
+        List<String> stringCategories = new ArrayList<>();
+
+        for (ItemCategory category : categories) {
+            stringCategories.add(category.toString());
+        }
+        return stringCategories;
+    }
+
+    static synchronized void setLoginComplete(int status) {
+        loginComplete.set(status);
+    }
+
+    static synchronized void setRegisterComplete(int status) {
+        registerComplete.set(status);
+    }
+
+    /**
+     * Pass-through method for Location.getLocationFromName(String)
+     *
+     * @param name the name of the location to find
+     * @return the Location with the given name
+     */
+    public Location getLocationFromName(String name) {
+        return locationManager.getLocationFromName(name);
+    }
+
+    /**
+     * Pass-through method for Location.getLocationNames()
+     *
+     * @return a list of the names of all Locations
+     */
+    public List<String> getLocationNames() {
+        return locationManager.getLocationNames();
     }
 }

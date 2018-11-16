@@ -1,5 +1,8 @@
 package com.github.buzztracker.model;
 
+/**
+ * Represents a generic user of the app
+ */
 public class User {
 
     private String password;
@@ -9,8 +12,20 @@ public class User {
     private long phoneNumber;
     private boolean locked;
 
+    /**
+     * Empty constructor for Firebase
+     */
     public User() {}
 
+    /**
+     * Creates a new user
+     *
+     * @param password password
+     * @param firstName first name
+     * @param lastName last name
+     * @param email email address
+     * @param phoneNumber phone number
+     */
     public User(String password, String firstName, String lastName, String email,
                 long phoneNumber) {
         this.password = password;
@@ -21,61 +36,66 @@ public class User {
         locked = false;
     }
 
+    /**
+     * Public getter for password
+     *
+     * @return password
+     */
     public String getPassword() {
         return this.password;
     }
 
-    public void setPassword(String password) {
-        checkData(password);
-        this.password = password;
-    }
-
+    /**
+     * Public getter for first name
+     *
+     * @return first name
+     */
     public String getFirstName () {
         return this.firstName;
     }
 
-    public void setFirstName(String firstName) {
-        checkData(firstName);
-        this.firstName = firstName;
-    }
-
+    /**
+     * Public getter for last name
+     *
+     * @return last name
+     */
     public String getLastName() {
         return this.lastName;
     }
 
-    public void setLastName(String lastName) {
-        checkData(lastName);
-        this.lastName = lastName;
-    }
-
+    /**
+     * Public getter for email
+     *
+     * @return email
+     */
     public String getEmail() {
         return this.email;
     }
 
-    public void setEmail(String email) {
-        checkData(email);
-        this.email = email;
-    }
-
+    /**
+     * Public getter for phone number
+     *
+     * @return phone number
+     */
     public long getPhoneNumber() {
         return this.phoneNumber;
     }
 
-    public void setPhoneNumber(long phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
+    /**
+     * Returns the locked status of the user
+     *
+     * @return true is the account is locked, false if unlocked
+     */
     public boolean getLocked() {
         return locked;
     }
 
+    /**
+     * Sets the locked status of the user
+     *
+     * @param status the new locked status
+     */
     void setLocked(boolean status) {
         locked = status;
-    }
-
-    public void checkData(String dataIn) {
-        if (dataIn == null) {
-            throw new IllegalArgumentException("Invalid input data.");
-        }
     }
 }

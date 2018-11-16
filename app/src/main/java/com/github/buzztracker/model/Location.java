@@ -2,6 +2,9 @@ package com.github.buzztracker.model;
 
 import android.support.annotation.NonNull;
 
+/**
+ * Represents a donation location
+ */
 public class Location {
 
     private String locationName;
@@ -16,8 +19,26 @@ public class Location {
     private String website;
     private String key;
 
+    /**
+     * Empty constructor for Firebase
+     */
     public Location() {}
 
+    /**
+     * Creates a new Location with all its info
+     *
+     * @param key unique id
+     * @param name location name
+     * @param type location type
+     * @param latitude geographical latitude
+     * @param longitude geographical longitude
+     * @param street street address
+     * @param city location city
+     * @param state location state
+     * @param zipCode location zip code
+     * @param phoneNumber location phone number
+     * @param website location website
+     */
     public Location(String key, String name, String type, String latitude, String longitude,
                     String street, String city, String state, String zipCode, String phoneNumber,
                     String website) {
@@ -34,88 +55,103 @@ public class Location {
         this.website = website;
     }
 
+    /**
+     * Public getter for key
+     *
+     * @return key
+     */
     public String getKey() {
         return key;
     }
 
+    /**
+     * Public getter for location name
+     *
+     * @return name
+     */
     public String getLocationName() {
         return locationName;
     }
 
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
-    }
-
+    /**
+     * Public getter for location type
+     *
+     * @return type
+     */
     public String getLocationType() {
         return locationType;
     }
 
-    public void setLocationType(String locationType) {
-        this.locationType = locationType;
-    }
-
+    /**
+     * Public getter for location longitude
+     *
+     * @return longitude
+     */
     public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
-    }
-
+    /**
+     * Public getter for location latitude
+     *
+     * @return latitude
+     */
     public String getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
-
+    /**
+     * Public getter for street
+     *
+     * @return street address
+     */
     public String getStreet() {
         return street;
     }
 
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
+    /**
+     * Public getter for city
+     *
+     * @return city
+     */
     public String getCity() {
         return city;
     }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
-
+    /**
+     * Public getter for state
+     *
+     * @return state
+     */
     public String getState() {
         return state;
     }
 
-    public void setState(String state) {
-        this.state = state;
-    }
-
+    /**
+     * Public getter for zip code
+     *
+     * @return zip code
+     */
     public String getZipCode() {
         return zipCode;
     }
 
-    public void setZipCode(String zipCode) {
-        this.zipCode = zipCode;
-    }
-
+    /**
+     * Public getter for phone number
+     *
+     * @return phone number
+     */
     public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
+    /**
+     * Public getter for website
+     *
+     * @return website
+     */
     public String getWebsite() {
         return website;
-    }
-
-    public void setWebsite(String website) {
-        this.website = website;
     }
 
     @NonNull

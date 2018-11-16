@@ -14,6 +14,8 @@ import com.github.buzztracker.R;
 import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.Model;
 
+import java.util.List;
+
 /**
  * A fragment representing a single Item detail screen.
  * This fragment is either contained in a {@link ItemListActivity}
@@ -44,18 +46,18 @@ public class ItemDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Model model = Model.getInstance();
+        Bundle args = getArguments();
 
-        if (getArguments() != null && getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            String bundleString = getArguments().toString();
+        if ((args != null) && args.containsKey(ARG_ITEM_ID)) {
+            String bundleString = args.toString();
             int idIndex = bundleString.indexOf("=");
             idIndex++;
-            item = model.getInventory().get((Integer.parseInt(
+            List<Item> inventory = model.getInventory();
+            item = inventory.get((Integer.parseInt(
                     bundleString.substring(idIndex, idIndex + 1))) - 1);
 
             Activity activity = this.getActivity();
+            assert activity != null;
             CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
                 appBarLayout.setTitle(item.getShortDesc());

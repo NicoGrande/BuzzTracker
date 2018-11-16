@@ -3,10 +3,17 @@ package com.github.buzztracker.model;
 import android.support.annotation.NonNull;
 
 import java.util.Calendar;
+import java.text.DateFormat;
+import java.util.Date;
 
+import static java.text.DateFormat.getDateTimeInstance;
+
+/**
+ * Represents a donation that has been logged in the inventory
+ */
 public class Item {
 
-    static int idCounter = 0;
+    private static int idCounter;
     private int id;
     private String timestamp;
     private Location location;
@@ -16,83 +23,122 @@ public class Item {
     private ItemCategory category;
     private String comment;
 
+    /**
+     * Required empty constructor for Firebase
+     */
     public Item() {}
 
+    /**
+     * Creates a new Item
+     *
+     * @param location Location inventory where item is stored
+     * @param shortDesc short description of item
+     * @param fullDesc full description of item
+     * @param value cost in dollars
+     * @param category item category
+     * @param comment optional comment
+     */
     public Item (Location location, String shortDesc, String fullDesc, int value,
                  ItemCategory category, String comment) {
-        timestamp = java.text.DateFormat
-                .getDateTimeInstance()
-                .format(Calendar.getInstance().getTime());
+
+        DateFormat unformattedTimestamp = getDateTimeInstance();
+        Calendar calendar = Calendar.getInstance();
+        Date calendarTime = calendar.getTime();
+        timestamp = unformattedTimestamp.format(calendarTime);
+
         this.location = location;
         this.shortDesc = shortDesc;
         this.fullDesc = fullDesc;
         this.value = value;
         this.category = category;
         this.comment = comment;
-        id = ++idCounter;
+
+        incrementCounter();
+        id = idCounter;
     }
 
+    /**
+     * Creates a new Item without a comment
+     *
+     * @param location Location inventory where item is stored
+     * @param shortDesc short description of item
+     * @param fullDesc full description of item
+     * @param value cost in dollars
+     * @param category item category
+     */
     public Item (Location location, String shortDesc, String fullDesc, int value,
                  ItemCategory category) {
         this(location, shortDesc, fullDesc, value, category, "No comment provided");
     }
 
+    /**
+     * Public getter for timestamp
+     *
+     * @return timestamp
+     */
     public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
+    /**
+     * Public getter for location
+     *
+     * @return location
+     */
     public Location getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
+    /**
+     * Public getter for shortDesc
+     *
+     * @return shortDesc
+     */
     public String getShortDesc() {
         return shortDesc;
     }
 
-    public void setShortDesc(String shortDesc) {
-        this.shortDesc = shortDesc;
-    }
-
-    public String getFullDesc() {
+    /**
+     * Public getter for fullDesc
+     *
+     * @return fullDesc
+     */
+    String getFullDesc() {
         return fullDesc;
     }
 
-    public void setFullDesc(String fullDesc) {
-        this.fullDesc = fullDesc;
-    }
-
+    /**
+     * Public getter for value
+     *
+     * @return value
+     */
     public int getValue() {
         return value;
     }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
-
+    /**
+     * Public getter for category
+     *
+     * @return category
+     */
     public ItemCategory getCategory() {
         return category;
     }
 
-    public void setCategory(ItemCategory category) {
-        this.category = category;
-    }
-
+    /**
+     * Public getter for comment
+     *
+     * @return comment
+     */
     public String getComment() {
         return comment;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
+    /**
+     * Public getter for id
+     *
+     * @return id
+     */
     public int getId() {
         return id;
     }
@@ -110,4 +156,11 @@ public class Item {
         return allInfo;
     }
 
+    private static void incrementCounter() {
+        idCounter++;
+    }
+
+    static void setIdCounter(int newCount) {
+        idCounter = newCount;
+    }
 }

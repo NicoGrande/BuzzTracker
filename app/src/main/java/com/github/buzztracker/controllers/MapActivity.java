@@ -2,6 +2,7 @@ package com.github.buzztracker.controllers;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 
 import com.github.buzztracker.R;
 import com.github.buzztracker.model.Location;
@@ -10,11 +11,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
+/**
+ * Displays the locations on a Google Map
+ */
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private Model model;
@@ -26,7 +31,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         setContentView(R.layout.activity_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        SupportMapFragment mapFragment = (SupportMapFragment) fragmentManager
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
@@ -42,23 +48,25 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        GoogleMap mMap = googleMap;
-        mMap.getUiSettings().setZoomControlsEnabled(true);
+        UiSettings uiSettings= googleMap.getUiSettings();
+        uiSettings.setZoomControlsEnabled(true);
 
 
         List<Location> locations = model.getLocations();
+        List<LatLng> locationCoords = model.getLocationCoords();
 
         final float DEFAULT_ZOOM = 10.0f;
 
         // Add marker for each location and move the camera
-        for (Location location : locations) {
-            LatLng locationCoords = new LatLng(Double.parseDouble(location.getLatitude()),
-                    Double.parseDouble(location.getLongitude()));
-            mMap.addMarker(new MarkerOptions()
-                    .position(locationCoords)
-                    .title(location.getLocationName())
-                    .snippet(location.getPhoneNumber()));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationCoords, DEFAULT_ZOOM));
+        for (int i = 0; i < locationCoords.size(); i++) {
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(locationCoords.get(i));
+            Location location = locations.get(i);
+            markerOptions.title(location.getLocationName());
+            markerOptions.snippet(location.getPhoneNumber());
+            googleMap.addMarker(markerOptions);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationCoords.get(i),
+                    DEFAULT_ZOOM));
         }
     }
 }

@@ -7,8 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +17,7 @@ import com.github.buzztracker.R;
 import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.Model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,15 +46,6 @@ public class ItemListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
@@ -129,23 +119,24 @@ public class ItemListActivity extends AppCompatActivity {
         SimpleItemRecyclerViewAdapter(ItemListActivity parent,
                                       List<Item> items,
                                       boolean twoPane) {
-            mValues = items;
+            mValues = new ArrayList<>(items);
             mParentActivity = parent;
             mTwoPane = twoPane;
         }
 
         @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_list_content, parent, false);
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+            View view = layoutInflater.inflate(R.layout.item_list_content, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(String.format(Locale.US, "%d", mValues.get(position).getId()));
-            holder.mContentView.setText(mValues.get(position).getShortDesc());
+        public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+            Item currentItem = mValues.get(position);
+            holder.mIdView.setText(String.format(Locale.US, "%d", currentItem.getId()));
+            holder.mContentView.setText(currentItem.getShortDesc());
 
             holder.itemView.setTag(mValues.get(position));
             holder.itemView.setOnClickListener(mOnClickListener);

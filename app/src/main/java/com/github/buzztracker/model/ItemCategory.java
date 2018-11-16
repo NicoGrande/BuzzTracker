@@ -1,5 +1,8 @@
 package com.github.buzztracker.model;
 
+/**
+ * Category of Item
+ */
 public enum ItemCategory {
     CLOTHING ("Clothing"),
     HAT ("Hat"),
@@ -14,6 +17,11 @@ public enum ItemCategory {
         category = cat;
     }
 
+    /**
+     * Returns string version of category
+     *
+     * @return category string
+     */
     public String getAsString() {
         return category;
     }

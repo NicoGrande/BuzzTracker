@@ -3,20 +3,49 @@ package com.github.buzztracker.model;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * Holds information about all known locations
+ */
 public class LocationManager {
-    private static List<Location> locations = new ArrayList<>();
 
-    public static void addLocation(Location loc) {
+    /**
+     * Provides access to an instance of the location manager
+     *
+     * @return an instance of LocationManager
+     */
+    public static LocationManager getInstance() {
+        return new LocationManager();
+    }
+
+    private final List<Location> locations = new ArrayList<>();
+
+    /**
+     * Adds a new location to the location list
+     *
+     * @param loc new location to add
+     */
+    public void addLocation(Location loc) {
         locations.add(loc);
     }
 
-    public static List<Location> getLocations() {
-        return locations;
+    /**
+     * Public getter for location list
+     *
+     * @return list of all locations
+     */
+    public List<Location> getLocations() {
+        return Collections.unmodifiableList(locations);
     }
 
-    public static List<String> getLocationNames() {
+    /**
+     * Public getter for location list as strings
+     *
+     * @return list of all locations as strings
+     */
+    public List<String> getLocationNames() {
         List<String> locationNames = new ArrayList<>();
         for (Location l : locations) {
             locationNames.add(l.getLocationName());
@@ -24,17 +53,23 @@ public class LocationManager {
         return locationNames;
     }
 
-    // Returns null if location not found
-    public static Location getLocationFromName(String name) {
+    /**
+     * Determines which Location corresponds to passed in String of location name
+     *
+     * @param name the name of the desired Location
+     * @return the Location with the name that matches name, null otherwise
+     */
+    public Location getLocationFromName(String name) {
         for (Location loc : locations) {
-            if (loc.getLocationName().equals(name)) {
+            String locationName = loc.getLocationName();
+            if (locationName.equals(name)) {
                 return loc;
             }
         }
         return null;
     }
 
-    public static List<LatLng> getLocationCoords() {
+    List<LatLng> getLocationCoords() {
         List<LatLng> locationCoords = new ArrayList<>();
         for (Location location : locations) {
             locationCoords.add(new LatLng(Double.parseDouble(location.getLatitude()),
@@ -43,7 +78,7 @@ public class LocationManager {
         return locationCoords;
     }
 
-    public static void clearLocations() {
+    void clearLocations() {
         locations.clear();
     }
 

@@ -1,5 +1,8 @@
 package com.github.buzztracker.model;
 
+/**
+ * Represents a user with admin privileges
+ */
 public class Admin extends User {
 
     /**

@@ -16,6 +16,7 @@ import com.github.buzztracker.R;
 import com.github.buzztracker.model.Item;
 import com.github.buzztracker.model.Model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -67,21 +68,22 @@ public class SearchListActivity extends AppCompatActivity {
         private final List<Item> mValues;
 
         SimpleItemRecyclerViewAdapter(List<Item> items) {
-            mValues = items;
+            mValues = new ArrayList<>(items);
         }
 
         @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_list_content, parent, false);
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+            View view = layoutInflater.inflate(R.layout.item_list_content, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(String.format(Locale.US, "%d", mValues.get(position).getId()));
-            holder.mContentView.setText(mValues.get(position).getShortDesc());
+        public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+            Item item = mValues.get(position);
+            holder.mIdView.setText(String.format(Locale.US, "%d", item.getId()));
+            holder.mContentView.setText(item.getShortDesc());
 
             holder.itemView.setTag(mValues.get(position));
         }

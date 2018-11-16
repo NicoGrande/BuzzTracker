@@ -3,6 +3,7 @@ package com.github.buzztracker.controllers;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -17,6 +18,9 @@ import com.github.buzztracker.model.Model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Allows to search for specific items in inventory
+ */
 public class SearchActivity extends AppCompatActivity {
 
     // UI references
@@ -90,14 +94,23 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void searchByKeyword() {
-        String searchKeywords = searchTextView.getText().toString().trim();
-        String location = locationSpinner.getSelectedItem().toString();
+        Editable viewText = searchTextView.getText();
+        String searchKeywords = viewText.toString();
+        searchKeywords = searchKeywords.trim();
+
+        Object spinnerSelectedItem = locationSpinner.getSelectedItem();
+        String location = spinnerSelectedItem.toString();
+
         model.searchByKeyword(searchKeywords, location, this);
     }
 
     private void searchByCategory() {
-        ItemCategory category = model.getCategory(categorySpinner.getSelectedItem().toString());
-        String location = locationSpinner.getSelectedItem().toString();
+        Object spinnerSelectedItem = categorySpinner.getSelectedItem();
+        ItemCategory category = model.getCategory(spinnerSelectedItem.toString());
+
+        spinnerSelectedItem = locationSpinner.getSelectedItem();
+        String location = spinnerSelectedItem.toString();
+
         model.searchByCategory(category, location, this);
     }
 }

@@ -1,11 +1,12 @@
 package com.github.buzztracker.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class Inventory {
+class Inventory {
 
-    private static List<Item> inventory = new ArrayList<>();
+    private static final List<Item> inventory = new ArrayList<>();
     private static List<Item> filteredInventory = new ArrayList<>();
 
     static void addToInventory(Item item) {
@@ -13,15 +14,15 @@ public class Inventory {
     }
 
     static List<Item> getInventory() {
-        return inventory;
+        return Collections.unmodifiableList(inventory);
     }
 
     static void setFilteredInventory(List<Item> list) {
-        filteredInventory = list;
+        filteredInventory = new ArrayList<>(list);
     }
 
     static List<Item> getFilteredInventory() {
-        return filteredInventory;
+        return Collections.unmodifiableList(filteredInventory);
     }
 
     static void clear() {

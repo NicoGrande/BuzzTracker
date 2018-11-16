@@ -4,17 +4,14 @@ class Verification {
 
     // Verifies all possible email addresses with complicated regex
     static boolean isPotentialEmail(String email) {
-        if (email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*" +
-                "|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|" +
+        return email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
+                "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|" +
                 "\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*" +
                 "[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|" +
                 "1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|" +
                 "[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:" +
                 "(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|" +
-                "\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])")) {
-            return true;
-        }
-        return false;
+                "\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])");
     }
 
     // Verify strength of password
@@ -24,13 +21,10 @@ class Verification {
     //     One lowercase letter
     //     One number
     static boolean isStrongPassword(String password) {
-        if (password.length() >= 8
+        return (password.length() >= 8)
                 && password.matches(".*[A-Z].*")
                 && password.matches(".*[a-z].*")
-                && password.matches(".*\\d+.*")) {
-            return true;
-        }
-        return false;
+                && password.matches(".*\\d+.*");
     }
 
     // Determines if entered name is a possible name
@@ -56,10 +50,10 @@ class Verification {
     // Pulls only numbers out of phone number; removes (), ., -, +, and white space
     static String parsePhoneNumber(String phoneNumber) {
         String[] splitNumber = phoneNumber.split("(\\s|\\(|\\)|-|\\.|\\+)*");
-        String parsedNumber = "";
+        StringBuilder parsedNumber = new StringBuilder();
         for (String numbers: splitNumber) {
-            parsedNumber += numbers;
+            parsedNumber.append(numbers);
         }
-        return phoneNumber;
+        return parsedNumber.toString();
     }
 }

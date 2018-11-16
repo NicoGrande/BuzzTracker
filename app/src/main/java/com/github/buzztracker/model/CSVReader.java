@@ -11,25 +11,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-public class CSVReader {
+class CSVReader {
 
     /**
      * Reads in location info from a CSV file and adds locations to the location list
      *
      * @param input a string of comma separated strings with which to build the locations
      */
-    static void parseCSV(InputStream input) {
+    static void parseCSV(InputStream input, LocationManager locationManager) {
         try {
             BufferedReader data = new BufferedReader(new InputStreamReader(input,
                     StandardCharsets.UTF_8));
 
             String line;
             data.readLine(); //get rid of header line
-            line = data.readLine();;
-            LocationManager.clearLocations();
+            line = data.readLine();
+            locationManager.clearLocations();
             while (line != null) {
                 String[] tokens = line.split(",");
-                LocationManager.addLocation(new Location(tokens[0], tokens[1], tokens[8],
+                locationManager.addLocation(new Location(tokens[0], tokens[1], tokens[8],
                         tokens[2], tokens[3], tokens[4], tokens[5], tokens[6], tokens[7],
                         tokens[9], tokens[10]));
                 line = data.readLine();

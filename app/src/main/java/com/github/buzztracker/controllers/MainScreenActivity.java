@@ -9,6 +9,9 @@ import android.widget.Button;
 import com.github.buzztracker.R;
 import com.google.firebase.auth.FirebaseAuth;
 
+/**
+ * Holds buttons to all other portions of the app
+ */
 public class MainScreenActivity extends AppCompatActivity {
 
     @Override
@@ -18,8 +21,10 @@ public class MainScreenActivity extends AppCompatActivity {
 
         final Button button = findViewById(R.id.button_logOut_main);
         button.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
+                FirebaseAuth auth = FirebaseAuth.getInstance();
+                auth.signOut();
                 Intent myIntent = new Intent(MainScreenActivity.this, LoginActivity.class);
                 MainScreenActivity.this.startActivity(myIntent);
             }
@@ -27,6 +32,7 @@ public class MainScreenActivity extends AppCompatActivity {
 
         final Button locButton = findViewById(R.id.location);
         locButton.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
                 Intent myIntent = new Intent(MainScreenActivity.this, LocationListActivity.class);
                 MainScreenActivity.this.startActivity(myIntent);

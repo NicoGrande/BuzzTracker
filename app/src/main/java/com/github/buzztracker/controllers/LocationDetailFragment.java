@@ -14,6 +14,8 @@ import com.github.buzztracker.R;
 import com.github.buzztracker.model.Location;
 import com.github.buzztracker.model.Model;
 
+import java.util.List;
+
 /**
  * A fragment representing a single Location detail screen.
  * This fragment is either contained in a {@link LocationListActivity}
@@ -45,17 +47,18 @@ public class LocationDetailFragment extends Fragment {
 
         Model model = Model.getInstance();
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            String bundleString = getArguments().toString();
+        assert getArguments() != null;
+        Bundle bundle = getArguments();
+        if (bundle.containsKey(ARG_ITEM_ID)) {
+            String bundleString = bundle.toString();
             int idIndex = bundleString.indexOf("=");
             idIndex++;
-            location = model.getLocations().get((Integer.parseInt(
+            List<Location> locations = model.getLocations();
+            location = locations.get((Integer.parseInt(
                     bundleString.substring(idIndex, idIndex + 1))) - 1);
 
             Activity activity = this.getActivity();
+            assert activity != null;
             CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
                 appBarLayout.setTitle(location.getLocationName());
