@@ -1,6 +1,5 @@
 package com.github.buzztracker;
 
-import com.github.buzztracker.controllers.SearchActivity;
 import com.github.buzztracker.model.Admin;
 import com.github.buzztracker.model.Location;
 import com.github.buzztracker.model.LocationEmployee;
@@ -60,5 +59,6 @@ public class ModelTest {
             fail("Did not throw IllegalArgumentException when creating user with illegal user type");
         } catch (IllegalArgumentException ignored) {}
     }
+
 
 }

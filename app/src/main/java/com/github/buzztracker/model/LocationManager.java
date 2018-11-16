@@ -1,6 +1,6 @@
 package com.github.buzztracker.model;
 
-import com.github.buzztracker.model.Location;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,18 @@ public class LocationManager {
         return null;
     }
 
+    public static List<LatLng> getLocationCoords() {
+        List<LatLng> locationCoords = new ArrayList<>();
+        for (Location location : locations) {
+            locationCoords.add(new LatLng(Double.parseDouble(location.getLatitude()),
+                    Double.parseDouble(location.getLongitude())));
+        }
+        return locationCoords;
+    }
+
     public static void clearLocations() {
         locations.clear();
     }
+
+
 }
