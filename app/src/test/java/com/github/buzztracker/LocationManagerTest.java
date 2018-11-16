@@ -64,39 +64,24 @@ public class LocationManagerTest {
     @Test
     public void testGetLocationCoords() {
 
-        // Todo: Mimic the format that Kevin did below
-        // Your test doesn't actually call getLocationCoords() which means it can't be testing it
-        // Start by generating a List of LatLngs that would be expected from every location
-        // You will either need to reference res/raw/locations.csv or the app location list UI screens to get the coordinates
+        // Generating a List of LatLngs that would be expected from every location
         List<LatLng> expectedCoords = new ArrayList<>();
         expectedCoords.add(new LatLng(33.75416, -84.37742)); // LatLng for location 1
-        // Add the other 5 locations' LatLngs here into expectedCoords
+        expectedCoords.add(new LatLng(33.73182, -84.43971)); // LatLng for location 2
+        expectedCoords.add(new LatLng(33.70866, -84.41853)); // LatLng for location 3
+        expectedCoords.add(new LatLng(33.80129, -84.25537)); // LatLng for location 4
+        expectedCoords.add(new LatLng(33.71747, -84.2521)); // LatLng for location 5
+        expectedCoords.add(new LatLng(33.96921, -84.3688)); // LatLng for location 6
 
-        // Next, call the method and store the returned results in another List. This is the actual result
+        // Call the method and store the returned results in another List. This is the actual result
+        List<LatLng> actualLocCoords = locationManager.getLocationCoords();
 
         // To verify the correctness, iterate through the lists together
         // and assert that expectedCoords[i] equals actualCoords[i] for each i
-
-        // Todo: Add another check here to verify that the method returns null if the location list is empty
-        locationManager.clearLocations();
-
-
-        // Last, remove everything below here. I hope this helps
-        String locationName = "Location";
-        String[] lat = {"78", "45","60","91","23"};
-        String[] lng = {"43", "39","55","74","82"};
-
-        for (int i = 0; i < lat.length; i++) {
-
-            Location location = new Location("3", locationName, "pickup", lat[i], lng[i], "930 Spring",
-                    "Atlanta", "Georgia", "30309", "4049012977", "www.gatech.edu");
-
-            locationManager.addLocation(location);
-
-            assertEquals("Did not return correct location", location, (new LatLng(Double.parseDouble(lat[i]),
-                    Double.parseDouble(lng[i]))));
-
+        for (int i = 0; i < expectedCoords.size(); i++) {
+            assertEquals("Coordinates of all Locations not properly received", expectedCoords.get(i), actualLocCoords.get(i));
         }
+        locationManager.clearLocations();
     }
 
     /**
