@@ -59,4 +59,6 @@ public class ModelTest {
             fail("Did not throw IllegalArgumentException when creating user with illegal user type");
         } catch (IllegalArgumentException ignored) {}
     }
+
+
 }
