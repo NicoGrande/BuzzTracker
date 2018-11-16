@@ -22,15 +22,14 @@ public class Verification {
     //     One number
     public static boolean isStrongPassword(String password) {
         return (password.length() >= 8)
-                && password.matches(".*[A-Z].*")
-                && password.matches(".*[a-z].*")
-                && password.matches(".*\\d+.*");
+                && password.matches(".*[A-Z].*") // Has at least one uppercase letter
+                && password.matches(".*[a-z].*") // Has at least one lowercase letter
+                && password.matches(".*\\d+.*"); // Has at least one number
     }
 
     // Determines if entered name is a possible name
     public static boolean isNameLegal(String name) {
-        // Matches all international characters
-        return name.matches("^[\\p{L}]+$");
+        return name.matches("^[\\p{L}]+$"); // Matches all international characters
     }
 
     // Removes -, ', and whitespace from names

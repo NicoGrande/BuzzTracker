@@ -43,7 +43,7 @@ public class LocationManager {
     /**
      * Public getter for location list as strings
      *
-     * @return list of all locations as strings
+     * @return list of all locations as strings; null if empty
      */
     public List<String> getLocationNames() {
         List<String> locationNames = new ArrayList<>();
@@ -69,7 +69,12 @@ public class LocationManager {
         return null;
     }
 
-    List<LatLng> getLocationCoords() {
+    /**
+     * Public getter for location coordinates for use in the map
+     *
+     * @return list of all location coordinates; null if empty
+     */
+    public List<LatLng> getLocationCoords() {
         List<LatLng> locationCoords = new ArrayList<>();
         for (Location location : locations) {
             locationCoords.add(new LatLng(Double.parseDouble(location.getLatitude()),
@@ -78,7 +83,10 @@ public class LocationManager {
         return locationCoords;
     }
 
-    void clearLocations() {
+    /**
+     * Removes all locations from the list
+     */
+    public void clearLocations() {
         locations.clear();
     }
 

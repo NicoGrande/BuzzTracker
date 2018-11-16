@@ -11,14 +11,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
-class CSVReader {
+/**
+ * Reads in location information from locations.csv
+ */
+public class CSVReader {
 
     /**
      * Reads in location info from a CSV file and adds locations to the location list
      *
      * @param input a string of comma separated strings with which to build the locations
      */
-    static void parseCSV(InputStream input, LocationManager locationManager) {
+    public static void parseCSV(InputStream input, LocationManager locationManager) {
         try {
             BufferedReader data = new BufferedReader(new InputStreamReader(input,
                     StandardCharsets.UTF_8));
