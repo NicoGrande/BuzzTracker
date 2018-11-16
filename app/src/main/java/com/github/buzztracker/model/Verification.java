@@ -1,9 +1,9 @@
 package com.github.buzztracker.model;
 
-class Verification {
+public class Verification {
 
     // Verifies all possible email addresses with complicated regex
-    static boolean isPotentialEmail(String email) {
+    public static boolean isPotentialEmail(String email) {
         return email.matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|" +
                 "\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*" +
@@ -20,7 +20,7 @@ class Verification {
     //     One uppercase letter
     //     One lowercase letter
     //     One number
-    static boolean isStrongPassword(String password) {
+    public static boolean isStrongPassword(String password) {
         return (password.length() >= 8)
                 && password.matches(".*[A-Z].*")
                 && password.matches(".*[a-z].*")
@@ -28,13 +28,13 @@ class Verification {
     }
 
     // Determines if entered name is a possible name
-    static boolean isNameLegal(String name) {
+    public static boolean isNameLegal(String name) {
         // Matches all international characters
         return name.matches("^[\\p{L}]+$");
     }
 
     // Removes -, ', and whitespace from names
-    static String removeCommonNameChars(String name) {
+    public static String removeCommonNameChars(String name) {
         String newName;
         newName = name.replaceAll("\\s+", "");
         newName = newName.replaceAll("-", "");
@@ -43,12 +43,12 @@ class Verification {
     }
 
     // Determines if parsed phone number has only numbers and is not empty
-    static boolean isPhoneValid(String number) {
+    public static boolean isPhoneValid(String number) {
         return number.matches("\\d+");
     }
 
     // Pulls only numbers out of phone number; removes (), ., -, +, and white space
-    static String parsePhoneNumber(String phoneNumber) {
+    public static String parsePhoneNumber(String phoneNumber) {
         String[] splitNumber = phoneNumber.split("(\\s|\\(|\\)|-|\\.|\\+)*");
         StringBuilder parsedNumber = new StringBuilder();
         for (String numbers: splitNumber) {
