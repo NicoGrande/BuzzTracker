@@ -2,6 +2,7 @@ package com.github.buzztracker;
 
         import com.github.buzztracker.model.Location;
         import com.github.buzztracker.model.LocationManager;
+        import com.google.android.gms.maps.model.LatLng;
 
         import org.junit.Test;
 
