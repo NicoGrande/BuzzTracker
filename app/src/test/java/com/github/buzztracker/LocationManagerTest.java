@@ -36,7 +36,8 @@ public class LocationManagerTest {
         locationManager = LocationManager.getInstance();
 
         // Populates locations with info from above
-        CSVReader.parseCSV(stream, locationManager);
+        CSVReader csvReader = new CSVReader();
+        csvReader.parseCSV(stream, locationManager);
     }
 
     /**
@@ -104,9 +105,9 @@ public class LocationManagerTest {
             assertEquals("Names of all Locations not properly received", expectedLocNames.get(i), actualLocNames.get(i));
         }
 
-        // Todo: Add a test that checks if null is returned on an empty location list
         // Tests results when location list is empty
         locationManager.clearLocations();
-
+        actualLocNames = locationManager.getLocationNames();
+        assertNull("Did not return null on empty location list", actualLocNames);
     }
 }

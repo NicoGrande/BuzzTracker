@@ -15,6 +15,8 @@ import com.github.buzztracker.R;
 import com.github.buzztracker.model.ItemCategory;
 import com.github.buzztracker.model.Model;
 
+import java.util.List;
+
 /**
  * Allows items to be registered into inventory
  */
@@ -64,13 +66,13 @@ public class ItemRegistrationActivity extends AppCompatActivity {
 
         categorySpinner = findViewById(R.id.item_category);
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, model.getItemCategoryValuesAsString());
+                android.R.layout.simple_spinner_item, getItemCategoryValuesAsString());
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categorySpinner.setAdapter(categoryAdapter);
 
         locationSpinner = findViewById(R.id.item_location);
         ArrayAdapter<String> locationAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item, model.getLocationNames());
+                android.R.layout.simple_spinner_dropdown_item, getLocationNames());
         locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationSpinner.setAdapter(locationAdapter);
 
@@ -82,6 +84,14 @@ public class ItemRegistrationActivity extends AppCompatActivity {
 
         addItemView = findViewById(R.id.item_add_form);
         progressView = findViewById(R.id.item_add_progress);
+    }
+
+    private List<String> getItemCategoryValuesAsString() {
+        return model.getItemCategoryValuesAsString();
+    }
+
+    private List<String> getLocationNames() {
+        return model.getLocationNames();
     }
 
     private void attemptCreateItem() {

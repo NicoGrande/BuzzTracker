@@ -27,32 +27,20 @@ public class Location {
     /**
      * Creates a new Location with all its info
      *
-     * @param key unique id
-     * @param name location name
-     * @param type location type
-     * @param latitude geographical latitude
-     * @param longitude geographical longitude
-     * @param street street address
-     * @param city location city
-     * @param state location state
-     * @param zipCode location zip code
-     * @param phoneNumber location phone number
-     * @param website location website
+     * @param locData an array containing the location information
      */
-    public Location(String key, String name, String type, String latitude, String longitude,
-                    String street, String city, String state, String zipCode, String phoneNumber,
-                    String website) {
-        this.key = key;
-        locationName = name;
-        locationType = type;
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.street = street;
-        this.city = city;
-        this.state = state;
-        this.zipCode = zipCode;
-        this.phoneNumber = phoneNumber;
-        this.website = website;
+    public Location(String[] locData) {
+        this.key = locData[0];
+        locationName = locData[1];
+        locationType = locData[2];
+        this.longitude = locData[4];
+        this.latitude = locData[3];
+        this.street = locData[5];
+        this.city = locData[6];
+        this.state = locData[7];
+        this.zipCode = locData[8];
+        this.phoneNumber = locData[9];
+        this.website = locData[10];
     }
 
     /**

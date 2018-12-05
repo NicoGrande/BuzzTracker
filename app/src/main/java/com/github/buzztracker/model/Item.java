@@ -31,26 +31,21 @@ public class Item {
     /**
      * Creates a new Item
      *
-     * @param location Location inventory where item is stored
-     * @param shortDesc short description of item
-     * @param fullDesc full description of item
-     * @param value cost in dollars
-     * @param category item category
-     * @param comment optional comment
+     * @param itemData an array containing the item information
+     * @param comment a comment
      */
-    public Item (Location location, String shortDesc, String fullDesc, int value,
-                 ItemCategory category, String comment) {
+    public Item (Object[] itemData, String comment) {
 
         DateFormat unformattedTimestamp = getDateTimeInstance();
         Calendar calendar = Calendar.getInstance();
         Date calendarTime = calendar.getTime();
         timestamp = unformattedTimestamp.format(calendarTime);
 
-        this.location = location;
-        this.shortDesc = shortDesc;
-        this.fullDesc = fullDesc;
-        this.value = value;
-        this.category = category;
+        this.location = (Location) itemData[0];
+        this.shortDesc = (String) itemData[1];
+        this.fullDesc = (String) itemData[2];
+        this.value = (int) itemData[3];
+        this.category = (ItemCategory) itemData[4];
         this.comment = comment;
 
         incrementCounter();
@@ -60,15 +55,10 @@ public class Item {
     /**
      * Creates a new Item without a comment
      *
-     * @param location Location inventory where item is stored
-     * @param shortDesc short description of item
-     * @param fullDesc full description of item
-     * @param value cost in dollars
-     * @param category item category
+     * @param itemData an array containing the item information
      */
-    public Item (Location location, String shortDesc, String fullDesc, int value,
-                 ItemCategory category) {
-        this(location, shortDesc, fullDesc, value, category, "No comment provided");
+    public Item (Object[] itemData) {
+        this(itemData, "No comment provided");
     }
 
     /**

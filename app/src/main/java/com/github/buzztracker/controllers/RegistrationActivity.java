@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.github.buzztracker.R;
+import com.github.buzztracker.model.Location;
 import com.github.buzztracker.model.Model;
 
 /**
@@ -37,8 +38,6 @@ public class RegistrationActivity extends AppCompatActivity {
     // Allows hiding registration screen to show loading UI
     private View registrationView;
     private View progressView;
-
-    // Manages registration request
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,21 +145,10 @@ public class RegistrationActivity extends AppCompatActivity {
             Editable viewText = passwordView1.getText();
             String password = viewText.toString();
 
-            viewText = firstNameView.getText();
-            String firstName = viewText.toString();
-            firstName = firstName.trim();
-
-            viewText = lastNameView.getText();
-            String lastName = viewText.toString();
-            lastName = lastName.trim();
-
-            viewText = emailView.getText();
-            String email = viewText.toString();
-            email = email.trim();
-
-            viewText = phoneNumberView.getText();
-            String phoneNumber = viewText.toString();
-            phoneNumber = phoneNumber.trim();
+            String firstName = getTextFromView(firstNameView);
+            String lastName = getTextFromView(lastNameView);
+            String email = getTextFromView(emailView);
+            String phoneNumber = getTextFromView(phoneNumberView);
 
             Object spinnerSelectedItem = userTypeSpinner.getSelectedItem();
             String userType = spinnerSelectedItem.toString();
@@ -170,9 +158,23 @@ public class RegistrationActivity extends AppCompatActivity {
 
             // Show a progress spinner, and create user; advance to main screen
             showProgress(true);
-            model.addNewUser(password, firstName, lastName, email, Long.parseLong(phoneNumber),
-                    userType, model.getLocationFromName(location), this);
+            Object[] userData = {password, firstName, lastName, email, Long.parseLong(phoneNumber),
+                    userType, model.getLocationFromName(location)};
+            addNewUser(userData);
         }
+    }
+
+    private void addNewUser(Object[] userData) {
+        model.addNewUser((String) userData[0], (String) userData[1], (String) userData[2],
+                (String) userData[3], (long) userData[4], (String) userData[5],
+                (Location) userData[6], this);
+    }
+
+    private String getTextFromView(EditText view) {
+        Editable viewText = view.getText();
+        String newText = viewText.toString();
+        newText = newText.trim();
+        return newText;
     }
 
     /**

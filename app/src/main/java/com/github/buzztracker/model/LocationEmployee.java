@@ -15,17 +15,12 @@ public class LocationEmployee extends User {
     /**
      * Creates a new Location Employee
      *
-     * @param pw password
-     * @param fName first name
-     * @param lName last name
-     * @param email email address
-     * @param phoneNum phone number
-     * @param loc location of employment
+     * @param userData an array containing the user information
      */
-    public LocationEmployee(String pw, String fName, String lName, String email, Long phoneNum,
-                            Location loc) {
-        super(pw, fName, lName, email, phoneNum);
-        location = loc;
+    public LocationEmployee(Object[] userData) {
+        super((String) userData[0], (String) userData[1], (String) userData[2],
+                (String) userData[3], (long) userData[4]);
+        location = (Location) userData[5];
     }
 
     /**

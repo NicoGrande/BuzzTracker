@@ -48,6 +48,7 @@ public final class Model {
 
     private FirebaseDatabase databaseInstance;
     private DatabaseReference databaseReference;
+    private final InventoryManager inventoryManager;
     private List<Item> inventory;
     private final LocationManager locationManager;
     private List<Location> locations;
@@ -57,6 +58,7 @@ public final class Model {
 
     private Model() {
         locationManager = LocationManager.getInstance();
+        inventoryManager = InventoryManager.getInstance();
         Model.initializeCompletes();
         loginAttempt = new Login();
         initializeModel();
@@ -109,7 +111,7 @@ public final class Model {
     }
 
     private void populateInventory() {
-        Inventory.clear();
+        inventoryManager.clear();
         databaseReference = databaseInstance.getReference();
         databaseReference = databaseReference.child(Constants.FIREBASE_CHILD_ITEMS);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -117,7 +119,7 @@ public final class Model {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     Item item = postSnapshot.getValue(Item.class);
-                    Inventory.addToInventory(item);
+                    inventoryManager.addToInventory(item);
                     Log.d("Item loaded in: ", (item != null) ? item.getShortDesc() : null);
                 }
             }
@@ -149,11 +151,9 @@ public final class Model {
             EditText firstNameView, EditText lastNameView, EditText phoneNumView,
             EditText locationView, EditText managerView, Spinner userTypeSpinner, Context context) {
 
-        Editable viewText = emailView.getText();
-        String email = viewText.toString();
-        email = email.trim();
 
-        viewText = passwordView1.getText();
+
+        Editable viewText = passwordView1.getText();
         String password1 = viewText.toString();
         password1 = password1.trim();
 
@@ -161,19 +161,10 @@ public final class Model {
         String password2 = viewText.toString();
         password2 = password2.trim();
 
-        viewText = firstNameView.getText();
-        String firstName = viewText.toString();
-        firstName = firstName.trim();
-
-        viewText = lastNameView.getText();
-        String lastName = viewText.toString();
-        lastName = lastName.trim();
-
         viewText = phoneNumView.getText();
         String phoneNumber = viewText.toString();
         phoneNumber = phoneNumber.trim();
-        phoneNumber = Verification.parsePhoneNumber(phoneNumber);
-        phoneNumber = Verification.removeCommonNameChars(phoneNumber);
+        phoneNumber = getParsedPhoneNumber(phoneNumber);
 
         viewText = locationView.getText();
         String location = viewText.toString();
@@ -188,6 +179,7 @@ public final class Model {
         userType = userType.trim();
 
         View focusView = null;
+        View tempView;
 
         // Manager verification
         if ("Location Employee".equals(userType) && TextUtils.isEmpty(managerName)) {
@@ -221,39 +213,71 @@ public final class Model {
         if (TextUtils.isEmpty(phoneNumber)) {
             phoneNumView.setError(context.getString(R.string.error_field_required));
             focusView = phoneNumView;
-        } else if (!(Verification.isPhoneValid(phoneNumber))) {
+        } else if (!(isPhoneValid(phoneNumber))) {
                 phoneNumView.setError(context.getString(
                         R.string.error_invalid_phone_number));
                 focusView = phoneNumView;
         }
 
-        // Email verification
-        if (TextUtils.isEmpty(email)) {
-            emailView.setError(context.getString(R.string.error_field_required));
-            focusView = emailView;
-        } else if (!(Verification.isPotentialEmail(email))) {
-            emailView.setError(context.getString(R.string.error_invalid_email));
-            focusView = emailView;
+        tempView = checkEmailForError(emailView, context);
+        if (tempView != null) {
+            focusView = tempView;
         }
-
-        // Last name verification
-        if (TextUtils.isEmpty(lastName)) {
-            lastNameView.setError(context.getString(R.string.error_field_required));
-            focusView = lastNameView;
-        } else if (!(Verification.isNameLegal(lastName))) {
-            lastNameView.setError(context.getString(R.string.error_invalid_name));
-            focusView = lastNameView;
+        tempView = checkNameForError(lastNameView, context);
+        if (tempView != null) {
+            focusView = tempView;
         }
-
-        // Last name verification
-        if (TextUtils.isEmpty(firstName)) {
-            firstNameView.setError(context.getString(R.string.error_field_required));
-            focusView = firstNameView;
-        } else if (!(Verification.isNameLegal(firstName))) {
-            firstNameView.setError(context.getString(R.string.error_invalid_name));
-            focusView = firstNameView;
+        tempView = checkNameForError(firstNameView, context);
+        if (tempView != null) {
+            focusView = tempView;
         }
         return focusView;
+    }
+
+    private View checkEmailForError(EditText view, Context context) {
+        Editable viewText = view.getText();
+        String email = viewText.toString();
+        email = email.trim();
+        boolean hasIssue = false;
+
+        if (TextUtils.isEmpty(email)) {
+            view.setError(context.getString(R.string.error_field_required));
+            hasIssue = true;
+        } else if (!(Verification.isPotentialEmail(email))) {
+            view.setError(context.getString(R.string.error_invalid_email));
+            hasIssue = true;
+        }
+        return hasIssue ? view : null;
+    }
+
+    private View checkNameForError(EditText view, Context context) {
+        Editable viewText = view.getText();
+        String text = viewText.toString();
+        text = text.trim();
+        boolean hasIssue = false;
+
+        if (TextUtils.isEmpty(text)) {
+            view.setError(context.getString(R.string.error_field_required));
+            hasIssue = true;
+        } else if (!(isNameLegal(text))) {
+            view.setError(context.getString(R.string.error_invalid_name));
+            hasIssue = true;
+        }
+        return hasIssue ? view : null;
+    }
+
+    private boolean isNameLegal(String name) {
+        return Verification.isNameLegal(name);
+    }
+
+    private String getParsedPhoneNumber(String phoneNumber) {
+        String newNumber = Verification.parsePhoneNumber(phoneNumber);
+        newNumber = Verification.removeCommonNameChars(newNumber);
+        return newNumber;
+    }
+
+    private boolean isPhoneValid(String phoneNumber) {
+        return Verification.isPhoneValid(phoneNumber);
     }
 
     /**
@@ -301,7 +325,8 @@ public final class Model {
         if ("User".equals(userType)) {
             newUser = new User(pw, fName, lName, email, phoneNum);
         } else if ("Location Employee".equals(userType)) {
-            newUser = new LocationEmployee(pw, fName, lName, email, phoneNum, loc);
+            Object[] userData = {pw, fName, lName, email, phoneNum, loc};
+            newUser = new LocationEmployee(userData);
         } else if ("Admin".equals(userType)) {
             newUser = new Admin(pw, fName, lName, email, phoneNum);
         } else if ("Manager".equals(userType)){
@@ -314,7 +339,7 @@ public final class Model {
     }
 
     private void updateInventory() {
-        inventory = Inventory.getInventory();
+        inventory = inventoryManager.getInventory();
     }
 
     /**
@@ -334,7 +359,8 @@ public final class Model {
     public void updateLocations(Context context) {
         Resources resources = context.getResources();
         InputStream locationsInfo = resources.openRawResource(R.raw.locations);
-        CSVReader.parseCSV(locationsInfo, locationManager);
+        CSVReader csvReader = new CSVReader();
+        csvReader.parseCSV(locationsInfo, locationManager);
         locations = locationManager.getLocations();
     }
 
@@ -460,7 +486,7 @@ public final class Model {
             Toast toast = Toast.makeText(context, R.string.search_no_matches, Toast.LENGTH_LONG);
             toast.show();
         } else {
-            Inventory.setFilteredInventory(items);
+            inventoryManager.setFilteredInventory(items);
             Intent i = new Intent(context, SearchListActivity.class);
             context.startActivity(i);
         }
@@ -537,11 +563,13 @@ public final class Model {
         Location loc = locationManager.getLocationFromName(location);
         Item item;
         if (comment.isEmpty()) {
-            item = new Item(loc, shortDesc, longDesc, value, category);
+            Object[] itemData = {loc, shortDesc, longDesc, value, category};
+            item = new Item(itemData);
         } else {
-            item = new Item(loc, shortDesc, longDesc, value, category, comment);
+            Object[] itemData = {loc, shortDesc, longDesc, value, category};
+            item = new Item(itemData, comment);
         }
-        Inventory.addToInventory(item);
+        inventoryManager.addToInventory(item);
         saveItemToFirebase(item);
         updateInventory();
         saveIDToFirebase(item.getId());
@@ -582,7 +610,7 @@ public final class Model {
      * @return a list containing the filtered search items matching the most recent search
      */
     public List<Item> getFilteredInventory() {
-        return Inventory.getFilteredInventory();
+        return inventoryManager.getFilteredInventory();
     }
 
     /**

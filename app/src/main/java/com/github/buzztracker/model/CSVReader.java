@@ -20,8 +20,9 @@ public class CSVReader {
      * Reads in location info from a CSV file and adds locations to the location list
      *
      * @param input a string of comma separated strings with which to build the locations
+     * @param locationManager a LocationManager instance
      */
-    public static void parseCSV(InputStream input, LocationManager locationManager) {
+    public void parseCSV(InputStream input, LocationManager locationManager) {
         try {
             BufferedReader data = new BufferedReader(new InputStreamReader(input,
                     StandardCharsets.UTF_8));
@@ -32,9 +33,10 @@ public class CSVReader {
             locationManager.clearLocations();
             while (line != null) {
                 String[] tokens = line.split(",");
-                locationManager.addLocation(new Location(tokens[0], tokens[1], tokens[8],
-                        tokens[2], tokens[3], tokens[4], tokens[5], tokens[6], tokens[7],
-                        tokens[9], tokens[10]));
+                String[] locData = {tokens[0], tokens[1], tokens[8], tokens[2],
+                        tokens[3], tokens[4], tokens[5], tokens[6], tokens[7],
+                        tokens[9], tokens[10]};
+                locationManager.addLocation(new Location(locData));
                 line = data.readLine();
             }
             data.close();
