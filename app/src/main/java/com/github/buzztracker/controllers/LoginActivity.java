@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -127,6 +129,23 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+
+        Button mForgotPasswordButton = findViewById(R.id.forgotPassword);
+        mForgotPasswordButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                String email = mEmailView.getText().toString();
+                if (TextUtils.isEmpty(email)) {
+
+                    Toast.makeText(LoginActivity.this, "Please enter email address.", Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    resetPassword(email);
+                }
+            }
+        });
     }
 
     private void attemptLogin() {
@@ -200,5 +219,26 @@ public class LoginActivity extends AppCompatActivity {
             progressView.setVisibility(show ? View.VISIBLE : View.GONE);
             loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
+
+    public void resetPassword(String email) {
+
+
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(LoginActivity.this, "Reset password email sent.", Toast.LENGTH_LONG).show();
+
+                        } else {
+
+                            Toast.makeText(LoginActivity.this, "Error sending password reset email.", Toast.LENGTH_LONG).show();
+
+                        }
+                    }
+                });
+
+    }
+
 }
 
