@@ -47,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private final int RC_SIGN_IN = 9000;
+    public static int failedAttempts = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +72,11 @@ public class LoginActivity extends AppCompatActivity {
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                if (failedAttempts < 3) {
+                    attemptLogin();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Exceeded login attempt limit. Try again later", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -98,6 +103,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if (firebaseAuth.getCurrentUser() != null) {
+                    failedAttempts = 0;
                         startActivity(new Intent(LoginActivity.this, MainScreenActivity.class));
                 }
             }
@@ -113,8 +119,12 @@ public class LoginActivity extends AppCompatActivity {
         signInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+                if (failedAttempts < 3) {
+                    Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                    startActivityForResult(signInIntent, RC_SIGN_IN);
+                } else {
+                    Toast.makeText(LoginActivity.this, "Exceeded login attempt limit. Try again later", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -171,12 +181,12 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Intent i = new Intent(LoginActivity.this, MainScreenActivity.class);
                             startActivity(i);
+                            failedAttempts = 0;
                         } else {
                             // If sign in fails, display a message to the user.
                             Toast.makeText(LoginActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                            failedAttempts++;
                         }
-
-                        // ...
                     }
                 });
     }

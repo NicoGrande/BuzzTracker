@@ -75,9 +75,11 @@ class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
         if (success) {
             Toast toast = Toast.makeText(context, R.string.login_success, Toast.LENGTH_SHORT);
             toast.show();
+            LoginActivity.failedAttempts = 0;
             Intent myIntent = new Intent(context, MainScreenActivity.class);
             context.startActivity(myIntent);
         } else {
+            LoginActivity.failedAttempts++;
             Toast toast = Toast.makeText(context,
                     R.string.error_incorrect_password, Toast.LENGTH_LONG);
             toast.show();
